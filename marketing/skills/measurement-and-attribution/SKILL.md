@@ -100,6 +100,26 @@ must keep in mind when you report:
 When you report a conversion metric, state the attribution window it's on. "ROAS
 2.1x" without "(7d-click/1d-view, Meta-attributed)" is a half-truth.
 
+### The one number that doesn't lie — blended new-customer CAC (ENCAC)
+
+Platform-reported CPA/ROAS is per-channel and self-credited; every channel
+claims the same sale. The credible, channel-agnostic truth is computed from the
+**CRM**, not from any ad platform:
+
+```
+ENCAC  =  total ad spend across ALL platforms (Meta + Google + TikTok + …)
+          ────────────────────────────────────────────────────────────────
+          total NEW customers in the CRM for the same period
+```
+
+This sidesteps attribution wars entirely — it asks "how many genuinely new
+customers did we get, and what did we pay in total to get them?" Pull spend per
+platform (`ads_get_insights` for Meta, the others via `mcp__apps__request`), pull
+new-customer count from the client's CRM, divide. When the client has a CRM,
+**ENCAC is the headline; per-platform ROAS is the supporting detail** — and when
+blended ENCAC and the sum of platform-reported CACs disagree (they will), the
+gap is the finding: platforms are over-crediting themselves.
+
 ---
 
 ## 3. The honesty rule — the differentiator

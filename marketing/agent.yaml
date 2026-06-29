@@ -70,6 +70,7 @@ skills:
   - ./skills/email-newsletters
   - ./skills/ugc-ads
   - ./skills/measurement-and-attribution
+  - ./skills/experimentation
 
 knowledge:
   - path: ./knowledge/brand-and-safety-policy.md

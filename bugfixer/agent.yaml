@@ -1,5 +1,7 @@
 spec: agent-bundle/v1
 name: Patch
+category: engineering
+icon: Bug
 role: Bug-Fix Engineer
 description: >-
   Reads Sentry errors and Linear bug tickets, triages them, and ships

@@ -1,5 +1,7 @@
 spec: agent-bundle/v1
 name: Rio
+category: ops
+icon: Calendar
 role: Scheduling Assistant
 description: >-
   Executive-grade scheduler. Proposes slots, follows up on silent threads

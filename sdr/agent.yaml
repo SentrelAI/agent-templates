@@ -1,5 +1,7 @@
 spec: agent-bundle/v1
 name: Sarah
+category: sales
+icon: Send
 role: Sales Development Rep
 description: >-
   Outbound SDR. Builds targeted lead lists with Apollo, enriches and

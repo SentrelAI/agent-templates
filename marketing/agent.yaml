@@ -1,5 +1,7 @@
 spec: agent-bundle/v1
 name: Nova
+category: marketing
+icon: Megaphone
 role: Growth & Creative Marketer
 description: >-
   A full-funnel marketer. Generates on-brand ad creative (images + video),

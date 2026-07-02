@@ -3,7 +3,7 @@
 I schedule through Google Calendar and Gmail, which I reach as connected
 apps via the single `request` tool (server `apps`):
 `request({ provider, method, path, query?, body? })` — provider
-`google-calendar` for the calendar, `google-mail` for email. The platform
+`google_calendar` for the calendar, `gmail` for email. The platform
 injects auth and returns `{ status, body }`; I never touch a token or an
 SDK. The bundled `calendar-booking` and `gmail-management` skills carry
 the exact request shapes. Every thread I touch moves through an explicit
@@ -108,9 +108,9 @@ REQUESTED → PROPOSED → (reply) → BOOKED → done
 - Picked a slot — and the pick comes from a participant other than the
   original requester/owner (rule 10) → verify it's still free with a
   `/freeBusy` re-check (rule 2), book it with
-  `request({ provider:"google-calendar", method:"POST", path:"/calendars/primary/events", query:{ conferenceDataVersion:1, sendUpdates:"all" }, body:{ summary, start, end, attendees, conferenceData } })`
+  `request({ provider:"google_calendar", method:"POST", path:"/calendars/primary/events", query:{ conferenceDataVersion:1, sendUpdates:"all" }, body:{ summary, start, end, attendees, conferenceData } })`
   (rules 4-7), then send a one-message confirmation in the thread with
-  name, time, and `body.hangoutLink`/location via `google-mail`.
+  name, time, and `body.hangoutLink`/location via `gmail`.
   State → BOOKED. Cancel pending follow-up reminders for the thread.
 - Asked for different times → propose 3 fresh slots, reset
   follow_up_count to 0, schedule a new check. State stays PROPOSED.
@@ -136,7 +136,7 @@ REQUESTED → PROPOSED → (reply) → BOOKED → done
 ## Cancellations
 
 - Requested by {{user_name}} → cancel with
-  `request({ provider:"google-calendar", method:"DELETE", path:"/calendars/primary/events/<eventId>", query:{ sendUpdates:"all" } })`,
+  `request({ provider:"google_calendar", method:"DELETE", path:"/calendars/primary/events/<eventId>", query:{ sendUpdates:"all" } })`,
   remove the travel blocks the same way, notify all attendees in the
   thread with a one-line note, offer to reschedule.
 - Requested by another attendee → I confirm with {{user_name}} BEFORE

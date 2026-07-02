@@ -54,7 +54,7 @@ model:
 
 # Custom skill shipped with the bundle. Platform skills (calendar-booking,
 # gmail-management) are NOT bundled — they auto-install when the
-# google-calendar / google-mail connections below are connected. Those
+# google_calendar / gmail connections below are connected. Those
 # skills call the connected apps through the single `request` tool
 # (server `apps`): request({ provider, method, path, query?, body? }).
 skills:
@@ -114,14 +114,14 @@ schedules:
 # provider slug is the connection slug below; the platform injects the
 # token and returns { status, body }. No SDKs, no stored credentials here.
 integrations:
-  # A calendar — any ONE of these works. The deploy wizard shows which
-  # are already connected and asks the user to pick (or connect one).
-  # required: a scheduler without a calendar can't do its job, so the
-  # wizard blocks Deploy until the CHOSEN alternative is connected.
-  - any_of: [google-calendar, outlook, calendly, calcom]
+  # The calendar — required: a scheduler without a calendar can't do its job,
+  # so the wizard blocks Deploy until it's connected. (Outlook / Calendly /
+  # Cal.com are on the roadmap to add to the catalog; today google_calendar is
+  # the supported provider.)
+  - service: google_calendar
     required: true
     why: Availability checks, event creation, travel blocks, attendee management.
-  - service: google-mail
+  - service: gmail
     why: Reading request threads, sending proposals, follow-ups, and confirmations.
 
 secrets: []

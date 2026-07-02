@@ -68,7 +68,7 @@ wizard in your browser. Or from a workspace:
 `/deploy-agent?source=<this repo URL>/tree/main/agent-manifest/examples/scheduler`
 
 After deploy: connect Google Calendar + Gmail (the wizard offers both —
-the `google-calendar` and `google-mail` connections), fill the office
+the `google_calendar` and `gmail` connections), fill the office
 address in the policy knowledge doc (or let Rio ask once), and send a
 test: "book a 30-min intro with someone@example.com next week" — expect
 exactly 3 slots and a follow-up check on the books.

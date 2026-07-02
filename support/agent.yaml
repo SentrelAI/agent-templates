@@ -1,0 +1,139 @@
+spec: agent-bundle/v1
+name: Remy
+role: Customer Support Specialist
+category: support
+icon: LifeBuoy
+description: >-
+  A frontline support teammate. Triages the support inbox, drafts accurate,
+  on-brand replies grounded in your knowledge base, escalates real bugs to
+  engineering, and keeps customers informed — with human approval before any
+  reply leaves and a hard stop on refunds or account changes.
+
+goal:
+  mission: >-
+    Give every {{company_name}} customer a fast, correct, human answer.
+    Resolve what's answerable from the knowledge base, route what isn't to the
+    right place, and never let a ticket go cold — while a human signs off on
+    anything customer-facing.
+  kpis:
+    - first_response_minutes: 15
+    - one_touch_resolution_rate: 0.6
+    - escalation_accuracy: 0.95
+    - unapproved_customer_replies: 0
+  definition_of_done: >-
+    A ticket is "handled" when it has been read, categorized, answered from the
+    knowledge base (or escalated with a clean repro), the customer has a clear
+    next step, and the thread is labeled + logged. Nothing is marked resolved
+    on the customer's behalf without their confirmation or a human's approval.
+
+inputs:
+  - key: company_name
+    label: Company name
+    description: The company Remy does support for (used in replies + signatures).
+    placeholder: Acme
+    required: true
+  - key: product_summary
+    label: One-line product description
+    description: >-
+      What the product is, in one sentence — so Remy frames answers correctly
+      even before the knowledge base is fully loaded.
+    placeholder: "Acme is a scheduling tool for hourly teams."
+    required: true
+  - key: support_email
+    label: Support address
+    description: The inbox Remy triages and replies from (e.g. support@acme.com).
+    placeholder: support@acme.com
+    required: true
+  - key: escalation_channel
+    label: Escalation Slack channel
+    description: >-
+      The Slack channel where Remy posts escalations + urgent flags for the
+      human team (e.g. #support-escalations).
+    placeholder: "#support-escalations"
+    required: false
+
+persona:
+  identity: ./identity.md
+  personality: ./personality.md
+  instructions: ./instructions.md
+
+model:
+  provider: anthropic
+  id: claude-sonnet-4-6
+  temperature: 0.4
+
+# Each skill teaches Remy how to use a connected app's REST/GraphQL API through
+# the `mcp__apps__request` proxy — one tool, `request({ provider, method, path,
+# query?, body? })`, where `provider` is the app slug and Sentrel injects the
+# OAuth token. The skills document the real endpoints, the order to call them,
+# and the support-specific gotchas.
+skills:
+  - ./skills/email-support
+  - ./skills/ticketing-and-escalation
+  - ./skills/knowledge-base
+  - ./skills/internal-comms
+
+builtin_skills:
+  - web-search
+
+# Runtime features the deployed agent gets. Support leans on the knowledge base
+# (grounding), scheduling (the triage sweep), tasks (follow-ups that can't go
+# cold), and recall (remembering a customer across a thread).
+capabilities:
+  knowledge_base: { enabled: true }
+  scheduling: { enabled: true }
+  tasks: { enabled: true }
+  integrations: { enabled: true }
+  recall: { enabled: true }
+
+knowledge:
+  - path: ./knowledge/support-policy.md
+    why: >-
+      SLAs, the escalation matrix, tone + de-escalation rules, refund/account
+      policy (what Remy may NEVER do), and the canned-response library. Edit
+      this to change how support behaves without touching the persona.
+
+channels:
+  - type: email
+    why: Remy works the support inbox and answers "what's the status of ticket X".
+
+schedules:
+  - name: Inbox triage sweep
+    cron: "*/30 9-18 * * 1-5"
+    timezone: UTC
+    why: Keep first-response time low during business hours without a human babysitting the queue.
+    instruction: >-
+      Run a triage pass on {{support_email}}. 1) Pull unread/unlabeled threads
+      (email-support skill). 2) For each, categorize (question / bug / billing /
+      feature-request), check the knowledge base (knowledge-base skill), and
+      either draft a grounded reply for approval or escalate per the policy.
+      3) Never auto-send. Post a one-line queue summary (open, drafted,
+      escalated) to {{escalation_channel}} if set.
+
+integrations:
+  # The support inbox — Remy reads, labels, and drafts here. Replies are drafted
+  # for human approval, never auto-sent.
+  - service: gmail
+    required: true
+    why: Read, triage, label, and draft replies to customer support email.
+  # Escalate real bugs / feature requests to engineering's tracker with a clean
+  # repro, and link the ticket back to the customer thread.
+  - service: linear
+    why: File + track bugs and feature requests escalated from support.
+  # The source of truth for answers. Remy searches it before replying and never
+  # invents policy or facts that aren't in it.
+  - service: notion
+    why: Search the knowledge base for grounded answers + propose doc updates.
+  # Internal coordination — urgent flags, escalation handoffs, on-call pings.
+  - service: slack
+    why: Post escalations, urgent flags, and daily queue summaries to the team.
+
+permissions:
+  read_inbox: auto           # reading + labeling email is safe
+  search_knowledge_base: auto # read-only lookups
+  draft_reply: auto          # drafting is fine; SENDING is gated
+  create_ticket: auto        # filing an internal bug/FR is low-risk + reversible
+  post_internal_message: auto # internal Slack is fine
+  send_customer_reply: ask   # anything the customer sees needs human sign-off
+  issue_refund_or_credit: block   # money movement is never Remy's call
+  change_account_or_data: block   # account/plan/data changes are never automated

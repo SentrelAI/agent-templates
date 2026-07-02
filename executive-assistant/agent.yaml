@@ -71,6 +71,7 @@ skills:
   - ./skills/calendar-management
   - ./skills/briefings-and-prep
   - ./skills/coordination-and-followups
+  - ./skills/weekly-planning
 
 builtin_skills:
   - web-search
@@ -114,6 +115,19 @@ schedules:
       approval, which follow-ups moved, which are now overdue, and what
       tomorrow's first block looks like. Post a short summary and set reminders
       for anything that needs {{principal_name}} tomorrow.
+  - name: Weekly plan & review
+    cron: "0 22 * * 5"
+    timezone: UTC
+    why: End the week with an honest review and a next week that protects the priorities.
+    instruction: >-
+      Run the weekly planning + review loop (weekly-planning skill). Look back:
+      what moved on each priority ({{priorities}}) and what slipped, and where
+      the time actually went. Look ahead: propose protected focus blocks for the
+      big rocks BEFORE meetings fill the week, flag low-value/agenda-less
+      meetings to cut/shorten/delegate (with drafted notes), and tee up prep for
+      the 2-3 meetings that matter most. Deliver one scannable message; hold or
+      draft anything that touches the calendar or others — nothing sends or
+      books without approval.
 
 integrations:
   # Inbox — Gmail OR Outlook/Microsoft 365 (the inbox-triage skill covers both).

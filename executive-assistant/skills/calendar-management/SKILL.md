@@ -12,7 +12,9 @@ API through the **`request`** tool:
 request({ provider:"google_calendar", method, path, query?, body? })
 ```
 
-- **Base is `https://www.googleapis.com`**, API root `/calendar/v3`.
+- **The base already includes the API version** (`https://www.googleapis.com/calendar/v3`),
+  so paths are relative to it: use `/calendars/primary/events`, **not**
+  `/calendar/v3/...`.
 - The principal's calendar id is **`primary`**. Auth is injected — never handle
   a token. Result is `{ status, body }`.
 - **Always work in {{principal_name}}'s timezone** (from {{working_hours}}).
@@ -23,7 +25,7 @@ request({ provider:"google_calendar", method, path, query?, body? })
 
 ```
 request({ provider:"google_calendar", method:"GET",
-  path:"/calendar/v3/calendars/primary/events",
+  path:"/calendars/primary/events",
   query:{ timeMin:"<RFC3339>", timeMax:"<RFC3339>",
           singleEvents:true, orderBy:"startTime" } })
 // → body.items[] each with summary, start/end (dateTime or date), attendees, hangoutLink/location
@@ -39,7 +41,7 @@ To propose times that work for everyone, query free/busy — don't eyeball it:
 
 ```
 request({ provider:"google_calendar", method:"POST",
-  path:"/calendar/v3/freeBusy",
+  path:"/freeBusy",
   body:{ timeMin:"<RFC3339>", timeMax:"<RFC3339>",
          timeZone:"<principal tz>",
          items:[{ id:"primary" }, { id:"person@x.com" }] } })
@@ -62,7 +64,7 @@ Create (after approval):
 
 ```
 request({ provider:"google_calendar", method:"POST",
-  path:"/calendar/v3/calendars/primary/events",
+  path:"/calendars/primary/events",
   query:{ sendUpdates:"all" },
   body:{ summary:"<title>", description:"<agenda>",
          start:{ dateTime:"<RFC3339>", timeZone:"<tz>" },
@@ -77,7 +79,7 @@ Move / reschedule (after approval) — patch just the times:
 
 ```
 request({ provider:"google_calendar", method:"PATCH",
-  path:"/calendar/v3/calendars/primary/events/<eventId>",
+  path:"/calendars/primary/events/<eventId>",
   query:{ sendUpdates:"all" },
   body:{ start:{ dateTime:"<new>", timeZone:"<tz>" },
          end:{ dateTime:"<new>", timeZone:"<tz>" } } })

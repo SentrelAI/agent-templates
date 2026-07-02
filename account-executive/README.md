@@ -9,24 +9,25 @@ data entry. Nothing is sent or committed without approval, and commercials
 ## How it works
 
 - **CRM** via the apps tool — Ace reads + updates deals, contacts, notes, and
-  tasks in **HubSpot** (`mcp__apps__request({ provider:"hubspot", … })`):
+  tasks in **HubSpot, Salesforce, OR Pipedrive** (whichever is connected):
   pipeline hygiene, MEDDIC notes, next-step tasks. Won/amount/commercial-stage
   changes are approval-gated.
-- **Scheduling** via **Google Calendar** — books demos/calls (free/busy, holds,
-  approval-gated booking) and preps the rep before each.
-- **Follow-ups** via **Gmail** — reads deal threads and **drafts** recaps,
-  re-engagement, and next-step emails that advance the deal. Never sends.
+- **Scheduling** via **Google Calendar OR Outlook** — books demos/calls
+  (free/busy, holds, approval-gated booking) and preps the rep before each.
+- **Follow-ups** via **Gmail OR Outlook** — reads deal threads and **drafts**
+  recaps, re-engagement, and next-step emails that advance the deal. Never sends.
 
-The three skills (`crm-hubspot`, `deal-scheduling`, `followups-and-outreach`)
-are **knowledge** — real endpoints + the gotchas (HubSpot search filters +
-pagination + association type ids, calendar free/busy + relative paths, Gmail
-base64url drafts + threading).
+The three skills (`crm`, `deal-scheduling`, `followups-and-outreach`) are
+**knowledge** — real endpoints + per-provider gotchas (HubSpot association ids /
+Salesforce SOQL / Pipedrive REST; Google free/busy + relative paths / Outlook
+`getSchedule`; Gmail base64url drafts / Outlook `createReply`).
 
-## Connect at /integrations
-- **HubSpot** (required) — the system of record. *(On the Nango roadmap — this
-  template is complete and becomes deployable the moment HubSpot is wired in.)*
-- **Google Calendar** (required) — scheduling + prep.
-- **Gmail** (required) — deal threads + drafted follow-ups.
+## Connect at /integrations (pick one per row)
+- **CRM** (required) — HubSpot **/** Salesforce **/** Pipedrive. *(All on the
+  Nango roadmap — the template is complete and each option lights up as it's
+  added.)*
+- **Calendar** (required) — Google Calendar **/** Outlook.
+- **Inbox** (required) — Gmail **/** Outlook.
 
 ## Guardrails (baked in)
 - **Draft-only** — nothing goes to a prospect without the rep's approval.

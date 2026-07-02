@@ -65,7 +65,7 @@ model:
   temperature: 0.4
 
 skills:
-  - ./skills/crm-hubspot
+  - ./skills/crm
   - ./skills/deal-scheduling
   - ./skills/followups-and-outreach
 
@@ -115,19 +115,19 @@ schedules:
       one outcome to drive. Deliver the briefs together.
 
 integrations:
-  # The CRM is the source of truth — Ace reads and updates deals, contacts,
-  # notes, and tasks here. NOTE: hubspot is on the Nango roadmap; this template
-  # is complete and becomes deployable the moment HubSpot is wired into the
-  # catalog. (See AGENT_ROADMAP.md → pending map.)
-  - service: hubspot
+  # The CRM — HubSpot, Salesforce, OR Pipedrive (the crm skill covers all three).
+  # required: at least one must be connected. (All three are on the Nango
+  # roadmap; the template is complete and each option lights up as it's added.
+  # See AGENT_ROADMAP.md → pending map.)
+  - any_of: [hubspot, salesforce, pipedrive]
     required: true
-    why: The system of record — deals, contacts, companies, activity, next steps.
-  # Booking demos, discovery calls, and follow-up meetings.
-  - service: google_calendar
+    why: The system of record — deals, contacts, activity, next steps.
+  # Booking demos/calls — Google Calendar OR Outlook (deal-scheduling covers both).
+  - any_of: [google_calendar, outlook]
     required: true
     why: Schedule demos/calls and prep {{rep_name}} before each one.
-  # Deal threads — Ace reads them and drafts every follow-up/proposal note.
-  - service: gmail
+  # Deal threads — Gmail OR Outlook (followups-and-outreach covers both).
+  - any_of: [gmail, outlook]
     required: true
     why: Read deal threads and draft follow-ups, recaps, and next-step emails.
 

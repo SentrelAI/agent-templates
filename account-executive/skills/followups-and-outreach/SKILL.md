@@ -1,19 +1,26 @@
 ---
 name: followups-and-outreach
-description: Use to read deal threads and draft follow-ups, call recaps, and next-step emails that actually advance the deal — never sending. Covers the Gmail REST API through the mcp__apps__request proxy (search, thread reads, draft creation with correct threading) and what makes a follow-up land vs. get ignored.
+description: Use to read deal threads and draft follow-ups, call recaps, and next-step emails that actually advance the deal — works with EITHER Gmail or Outlook/Microsoft 365, never sending. Covers both APIs (search, thread reads, draft creation with correct threading) and what makes a follow-up land vs. get ignored.
 ---
 
-# Follow-ups & outreach (Gmail)
+# Follow-ups & outreach (Gmail **or** Outlook)
 
 You keep deals moving by reading the thread and drafting the right next touch —
-always as a draft for {{rep_name}} to approve.
+always as a draft for {{rep_name}} to approve, on whichever mail provider is
+connected:
 
 ```
-request({ provider:"gmail", method, path, query?, body? })
+request({ provider, method, path, query?, body? })
 ```
 
-- **Base is `https://gmail.googleapis.com`**, mailbox prefix
-  `/gmail/v1/users/me`. Auth injected. Result `{ status, body }`.
+- **`provider:"gmail"`** → base `https://gmail.googleapis.com`, prefix
+  `/gmail/v1/users/me`.
+- **`provider:"outlook"`** → base `https://graph.microsoft.com/v1.0`, prefix
+  `/me`.
+- Auth injected for both. Result `{ status, body }`. Detect which is connected
+  and stay on it.
+
+## Gmail path
 
 ## Find the deal thread
 
@@ -44,6 +51,18 @@ request({ provider:"gmail", method:"POST", path:"/gmail/v1/users/me/drafts",
 ```
 
 Carry `In-Reply-To` + `References` so it threads as a reply.
+
+## Outlook / Microsoft 365 (Microsoft Graph)
+
+Same idea, Graph endpoints:
+- **Find the thread:** `GET /me/messages` ·
+  `query:{ $search:"\"prospect@x.com\"", $top:10, $select:"subject,from,conversationId,receivedDateTime" }`,
+  then read it by `$filter:"conversationId eq '<id>'"` (`$orderby:"receivedDateTime asc"`).
+  `body.value[].body.content` is the text directly — no base64 decode.
+- **Draft a reply (never send):** `POST /me/messages/<id>/createReply` →
+  `body.id` (a threaded draft in Drafts), then
+  `PATCH /me/messages/<draftId>` · `body:{ body:{ contentType:"HTML", content:"<reply>" } }`.
+  Leave it as a draft — do **not** POST `/send`.
 
 ## Types of touch (pick the right one)
 - **Post-call recap** — summarize what was agreed, restate the next step + date,

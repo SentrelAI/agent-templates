@@ -1,21 +1,22 @@
 ---
 name: deal-scheduling
-description: Use to book demos, discovery, and follow-up calls and to prep the rep before each — reading the calendar, finding open times with free/busy, holding tentative slots, and (after approval) booking/moving customer meetings. Covers the Google Calendar API through the mcp__apps__request proxy.
+description: Use to book demos, discovery, and follow-up calls and to prep the rep before each — works with EITHER Google Calendar or Outlook/Microsoft 365. Read the calendar, find open times with free/busy, hold tentative slots, and (after approval) book/move customer meetings on whichever is connected.
 ---
 
-# Deal scheduling (Google Calendar)
+# Deal scheduling (Google **or** Outlook)
 
-You arrange customer meetings via the Google Calendar API through the
-**`request`** tool:
+You arrange customer meetings through the **`request`** tool, on whichever
+calendar is connected:
 
 ```
-request({ provider:"google_calendar", method, path, query?, body? })
+request({ provider, method, path, query?, body? })
 ```
 
-- **The base already includes the API version** (`.../calendar/v3`), so paths
-  are relative: `/calendars/primary/events`, `/freeBusy` — **not**
-  `/calendar/v3/...`. Auth is injected. Calendar id is `primary`.
-- **Always use {{rep_name}}'s timezone** and RFC 3339 with an offset.
+- **`provider:"google_calendar"`** → base `https://www.googleapis.com/calendar/v3`
+  (already versioned → relative paths `/calendars/primary/events`, `/freeBusy`).
+- **`provider:"outlook"`** → base `https://graph.microsoft.com/v1.0`, prefix `/me`.
+- Auth injected for both. **Always use {{rep_name}}'s timezone.** Detect which is
+  connected and stay on it.
 
 ## Read the meetings coming up
 
@@ -64,6 +65,23 @@ request({ provider:"google_calendar", method:"POST", path:"/calendars/primary/ev
 
 Move (after approval): `PATCH /calendars/primary/events/<eventId>` with new
 `start`/`end` and `query:{ sendUpdates:"all" }`.
+
+## Outlook / Microsoft 365 (Microsoft Graph)
+
+Same flow, Graph endpoints:
+- **Read upcoming** (expands recurrences): `GET /me/calendarView` ·
+  `query:{ startDateTime, endDateTime, $orderby:"start/dateTime", $select:"subject,start,end,attendees,onlineMeeting" }`.
+  Match events to CRM deals by attendee address/company.
+- **Free/busy:** `POST /me/calendar/getSchedule` ·
+  `body:{ schedules:["rep@x.com"], startTime:{dateTime,timeZone}, endTime:{dateTime,timeZone}, availabilityViewInterval:30 }`.
+- **Hold (auto):** `POST /me/events` with `showAs:"tentative"`, `[HOLD]` subject,
+  no attendees.
+- **Book / move (approval-gated — Graph emails the invite on create):**
+  `POST /me/events` · `body:{ subject, body:{contentType:"HTML",content:"<agenda>"},
+  start:{dateTime,timeZone}, end:{dateTime,timeZone},
+  attendees:[{ emailAddress:{ address, name }, type:"required" }],
+  isOnlineMeeting:true, onlineMeetingProvider:"teamsForBusiness" }`. Move =
+  `PATCH /me/events/<id>` (notifies attendees).
 
 ## Rules
 

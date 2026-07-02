@@ -72,6 +72,7 @@ skills:
   - ./skills/ticketing-and-escalation
   - ./skills/knowledge-base
   - ./skills/internal-comms
+  - ./skills/sla-and-reporting
 
 builtin_skills:
   - web-search
@@ -108,7 +109,19 @@ schedules:
       feature-request), check the knowledge base (knowledge-base skill), and
       either draft a grounded reply for approval or escalate per the policy.
       3) Never auto-send. Post a one-line queue summary (open, drafted,
-      escalated) to {{escalation_channel}} if set.
+      escalated) to {{escalation_channel}} if set. 4) Flag any ticket
+      approaching the SLA window before it breaches (sla-and-reporting skill).
+  - name: Weekly support report
+    cron: "0 15 * * 1"
+    timezone: UTC
+    why: Give the team the truth every Monday — volume, speed, breaches, top issues, KB gaps.
+    instruction: >-
+      Produce last week's support report (sla-and-reporting skill): volume by
+      category, median + p90 first-response and resolution vs. the SLA, any
+      breaches, escalations + Linear links, the 3-5 issue themes that drove the
+      most tickets, and the doc gaps to close. Deliver it as one scannable
+      message to {{escalation_channel}} (or the team) with the single
+      recommendation that matters most.
 
 integrations:
   # The support inbox — Remy reads, labels, and drafts here (Gmail OR Outlook /

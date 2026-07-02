@@ -116,10 +116,14 @@ schedules:
       for anything that needs {{principal_name}} tomorrow.
 
 integrations:
-  - service: gmail
+  # Inbox — Gmail OR Outlook/Microsoft 365 (the inbox-triage skill covers both).
+  # required: at least one must be connected. (outlook is on the Nango roadmap.)
+  - any_of: [gmail, outlook]
     required: true
-    why: Triage the inbox, draft replies, and manage labels/threads.
-  - service: google_calendar
+    why: Triage the inbox, draft replies, and manage labels/categories/threads.
+  # Calendar — Google Calendar OR Outlook Calendar (calendar-management covers
+  # both). With Microsoft 365, one `outlook` connection serves mail + calendar.
+  - any_of: [google_calendar, outlook]
     required: true
     why: Read/arrange the calendar, find times, protect focus + working hours.
   - service: notion

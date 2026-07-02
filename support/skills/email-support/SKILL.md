@@ -1,120 +1,128 @@
 ---
 name: email-support
-description: Use when triaging the support inbox or drafting a reply — listing/searching support email, reading a full thread, applying category labels, and creating a reply DRAFT (never sending). Covers the Gmail REST API through the mcp__apps__request proxy, the search query syntax, label management, and the base64url MIME gotcha for drafts.
+description: Use when triaging the support inbox or drafting a reply — works with EITHER Gmail or Outlook/Microsoft 365. Covers listing/searching support email, reading a full thread, categorizing (labels/categories), and creating a reply DRAFT (never sending) on whichever provider is connected. Includes provider detection and the per-provider gotchas (Gmail base64url MIME vs. Outlook createReply drafts).
 ---
 
-# Email support (Gmail)
+# Email support (Gmail **or** Outlook)
 
-You work the support inbox by calling the Gmail REST API through the
-**`request`** tool (server `apps`):
-
-```
-request({ provider:"gmail", method, path, query?, body? })
-```
-
-- **Base is `https://gmail.googleapis.com`.** Auth is injected — NEVER ask for,
-  include, or echo a token.
-- The mailbox path prefix is always `/gmail/v1/users/me`.
-- The tool result is `{ status, body }`. Read `body` for the JSON payload.
-- A 401/403 means the account isn't connected (or scope is missing) — say so
-  and ask the user to connect Gmail at /integrations. Don't guess endpoints.
-
-## Triage: find what needs attention
-
-Use Gmail's search `q` syntax to pull the queue:
+You work the support inbox through the **`request`** tool. This skill supports
+two providers — use whichever the workspace connected:
 
 ```
-request({ provider:"gmail", method:"GET",
-  path:"/gmail/v1/users/me/messages",
+request({ provider, method, path, query?, body? })
+```
+
+- **`provider:"gmail"`** → base `https://gmail.googleapis.com`, mailbox prefix
+  `/gmail/v1/users/me`.
+- **`provider:"outlook"`** → base `https://graph.microsoft.com/v1.0` (Microsoft
+  Graph), mailbox prefix `/me`.
+- Auth is injected for both — NEVER ask for, include, or echo a token. Result is
+  `{ status, body }`. A 401/403 means that provider isn't connected — say so and
+  point the user to /integrations.
+
+**Pick the provider once:** whichever of `gmail` / `outlook` is connected is the
+one you use for the whole session. Don't mix. If both are connected, prefer the
+one the support address ({{support_email}}) belongs to.
+
+---
+
+## Gmail
+
+### Triage — find what needs attention
+```
+request({ provider:"gmail", method:"GET", path:"/gmail/v1/users/me/messages",
   query:{ q:"in:inbox is:unread -label:handled", maxResults:25 } })
-// → body.messages = [{ id, threadId }, ...]  (ids only — you must fetch each)
+// → body.messages = [{ id, threadId }] (ids only — fetch each)
 ```
+`q` syntax: `is:unread`, `newer_than:2d`, `from:x@y.com`, `subject:refund`,
+`-label:handled`.
 
-Useful `q` filters: `is:unread`, `newer_than:2d`, `from:someone@x.com`,
-`subject:refund`, `-label:handled`, `label:escalated`. Combine them.
-
-## Read the full thread (always, before replying)
-
-Fetch the **thread**, not just one message, so you have the whole history:
-
+### Read the full thread
 ```
 request({ provider:"gmail", method:"GET",
   path:"/gmail/v1/users/me/threads/<threadId>", query:{ format:"full" } })
-// → body.messages[] each with .payload.headers (From/Subject/Date) and the body
 ```
+Body text is base64url in `payload.body.data` / the `text/plain` part. Pull
+`From`, `Subject`, `Message-ID`, `References` from `payload.headers`.
 
-The body text is base64url-encoded in `payload.body.data` (or in
-`payload.parts[]` for multipart — prefer the `text/plain` part). Decode it to
-read. Pull `From`, `Subject`, and `Message-ID`/`References` from
-`payload.headers` — you need `Message-ID` + `References` to thread a reply
-correctly.
-
-## Label (categorize the queue)
-
-Labels are how the queue stays organized. List them once to get their ids:
-
-```
-request({ provider:"gmail", method:"GET", path:"/gmail/v1/users/me/labels" })
-// → body.labels = [{ id, name }, ...]
-```
-
-If a category label (e.g. `bug`, `billing`, `handled`, `escalated`) doesn't
-exist, create it:
-
-```
-request({ provider:"gmail", method:"POST", path:"/gmail/v1/users/me/labels",
-  body:{ name:"escalated", labelListVisibility:"labelShow",
-         messageListVisibility:"show" } })
-```
-
-Apply/remove labels on a message (use the label **id**, not the name):
-
+### Label (categorize)
+List (`GET /gmail/v1/users/me/labels`), create missing
+(`POST /gmail/v1/users/me/labels {name}`), apply by id:
 ```
 request({ provider:"gmail", method:"POST",
-  path:"/gmail/v1/users/me/messages/<messageId>/modify",
-  body:{ addLabelIds:["<bugLabelId>"], removeLabelIds:["UNREAD"] } })
+  path:"/gmail/v1/users/me/messages/<id>/modify",
+  body:{ addLabelIds:["<labelId>"], removeLabelIds:["UNREAD"] } })
 ```
 
-`UNREAD`, `INBOX`, `STARRED` are built-in system label ids.
-
-## Draft a reply (NEVER send)
-
-You create a **draft** on the thread and submit it for approval. You do not
-call `messages/send` — sending a customer-facing reply is gated on
-`send_customer_reply` and happens only after a human approves.
-
-The message must be RFC 2822 MIME, **base64url-encoded** (`+`→`-`, `/`→`_`, no
-padding newlines) in the `raw` field, and carry `threadId` so it stays on the
-thread:
-
+### Draft a reply (NEVER send)
+Build RFC 2822 MIME (`To` / `Subject: Re:` / `In-Reply-To` / `References` /
+blank line / body), **base64url-encode** it, and create a draft on the thread:
 ```
-// 1) build the MIME string (headers + blank line + body):
-//    To: customer@x.com
-//    Subject: Re: <original subject>
-//    In-Reply-To: <original Message-ID>
-//    References: <original References + Message-ID>
-//    Content-Type: text/plain; charset="UTF-8"
-//
-//    <your reply text>
-// 2) base64url-encode it → <raw>
-request({ provider:"gmail", method:"POST",
-  path:"/gmail/v1/users/me/drafts",
+request({ provider:"gmail", method:"POST", path:"/gmail/v1/users/me/drafts",
   body:{ message:{ raw:"<base64url MIME>", threadId:"<threadId>" } } })
-// → body.id is the draft id; body.message.id the message id
 ```
+Never call `messages/send` — sending is gated on approval.
 
-Keeping `In-Reply-To` + `References` correct is what makes Gmail (and the
-customer's client) show it as a proper reply instead of a new email.
+---
 
-## Rules
+## Outlook / Microsoft 365 (Microsoft Graph)
 
-1. **Read the whole thread first.** Never reply off the last message alone.
-2. **Draft, never send.** Create a draft and submit for approval. The only
-   thing that sends is a human clicking approve.
-3. **Label everything you touch** — category + `handled`/`escalated` — so the
-   queue reflects reality and the triage search doesn't re-surface it.
-4. **Thread correctly.** Carry `threadId` + `In-Reply-To`/`References`, and
-   prefix the subject with `Re:` if it isn't already.
-5. **Verify identity before anything sensitive.** If the ask involves account
-   data, don't confirm details to an address that doesn't match the account on
-   file — escalate instead (see the policy).
+### Triage — find what needs attention
+```
+request({ provider:"outlook", method:"GET", path:"/me/messages",
+  query:{ $filter:"isRead eq false", $top:25,
+          $select:"subject,from,receivedDateTime,conversationId,isRead" } })
+// → body.value = [{ id, conversationId, subject, from, ... }]  (full objects)
+```
+Full-text search instead of a filter: `$search:"\"refund\""` (quotes required).
+
+### Read the full thread (conversation)
+Graph groups a thread by `conversationId`:
+```
+request({ provider:"outlook", method:"GET", path:"/me/messages",
+  query:{ $filter:"conversationId eq '<conversationId>'",
+          $orderby:"receivedDateTime asc",
+          $select:"subject,from,toRecipients,body,receivedDateTime" } })
+```
+`body.value[].body.content` is the message body (HTML or text per
+`body.contentType`) — no base64 decode needed.
+
+### Categorize (labels ≈ categories, or folders)
+Outlook uses **categories** (colored tags) and **folders**. Tag a message:
+```
+request({ provider:"outlook", method:"PATCH", path:"/me/messages/<id>",
+  body:{ categories:["Escalated"], isRead:true } })
+```
+(Master list: `GET /me/outlook/masterCategories`; create with `POST`.) To file
+it, move to a folder: `POST /me/messages/<id>/move { destinationId:"<folderId>" }`
+(well-known ids like `archive` work).
+
+### Draft a reply (NEVER send) — cleaner than Gmail
+Graph creates the draft *for you* on the thread, then you fill the body — no MIME
+assembly:
+```
+// 1) create the reply draft (lands in Drafts, correctly threaded):
+request({ provider:"outlook", method:"POST",
+  path:"/me/messages/<id>/createReply" })          // → body.id = draft id
+// 2) set the body:
+request({ provider:"outlook", method:"PATCH", path:"/me/messages/<draftId>",
+  body:{ body:{ contentType:"HTML", content:"<your reply>" } } })
+```
+Leave it as a draft — do **not** POST `/me/messages/<draftId>/send`. Use
+`createReplyAll` when the thread has multiple recipients who should stay looped.
+
+---
+
+## Rules (both providers)
+
+1. **Read the whole thread first** — never reply off the last message alone.
+2. **Draft, never send.** Gmail: create a draft, don't `send`. Outlook: create
+   the reply draft + set body, don't `/send`. A human approving is the only
+   thing that sends.
+3. **Categorize everything you touch** (Gmail labels / Outlook categories) so the
+   queue reflects reality — `handled` / `escalated` + the category.
+4. **Thread correctly.** Gmail: carry `threadId` + `In-Reply-To`/`References`.
+   Outlook: `createReply` handles threading for you.
+5. **One provider per session** — detect which is connected and stay on it.
+6. **Verify identity before anything sensitive** — don't confirm account details
+   to an address that doesn't match the account on file; escalate (see policy).

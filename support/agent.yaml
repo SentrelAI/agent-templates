@@ -111,9 +111,11 @@ schedules:
       escalated) to {{escalation_channel}} if set.
 
 integrations:
-  # The support inbox — Remy reads, labels, and drafts here. Replies are drafted
-  # for human approval, never auto-sent.
-  - service: gmail
+  # The support inbox — Remy reads, labels, and drafts here (Gmail OR Outlook /
+  # Microsoft 365; the email-support skill covers both). Replies are drafted for
+  # human approval, never auto-sent. required: at least one inbox must be
+  # connected. (outlook is on the Nango roadmap; gmail is live today.)
+  - any_of: [gmail, outlook]
     required: true
     why: Read, triage, label, and draft replies to customer support email.
   # Escalate real bugs / feature requests to engineering's tracker with a clean

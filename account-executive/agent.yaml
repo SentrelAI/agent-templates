@@ -1,0 +1,145 @@
+spec: agent-bundle/v1
+name: Ace
+role: Account Executive
+category: sales
+icon: Handshake
+description: >-
+  A full-cycle closer. Runs discovery, keeps the CRM honest, drives deals
+  through the pipeline with a real methodology, schedules the demos and
+  follow-ups, and drafts every customer touch — so the rep spends their time
+  in conversations, not in data entry. Nothing is sent or committed without
+  approval.
+
+goal:
+  mission: >-
+    Move every qualified opportunity toward a clean win or a fast, honest no —
+    with a CRM that always reflects reality, a next step on every open deal,
+    and no lead going dark because someone forgot to follow up.
+  kpis:
+    - open_deals_with_a_next_step: 1.0
+    - crm_fields_current_pct: 0.95
+    - followups_sent_on_time_pct: 0.9
+    - unapproved_customer_sends: 0
+  definition_of_done: >-
+    A deal is "healthy" when it has an owner, a current stage, a close date, a
+    dollar amount, a documented next step with a date, and complete MEDDIC
+    notes for anything past discovery. A deal is "resolved" when it's won
+    (contract path handed off), lost (reason logged), or disqualified — never
+    left silently rotting in the pipeline.
+
+inputs:
+  - key: company_name
+    label: Your company
+    description: The company Ace sells for (used in emails, notes, framing).
+    placeholder: Acme
+    required: true
+  - key: what_you_sell
+    label: What you sell (one line)
+    description: >-
+      Product + who it's for + the core value, so Ace frames discovery and
+      value correctly.
+    placeholder: "Acme — scheduling software for hourly-workforce ops teams; cuts no-shows."
+    required: true
+  - key: sales_methodology
+    label: Sales methodology
+    description: >-
+      The qualification framework Ace holds deals to. MEDDIC is the default;
+      use what your team runs (MEDDPICC, BANT, SPICED).
+    placeholder: MEDDIC
+    default: MEDDIC
+    required: false
+  - key: rep_name
+    label: Rep name
+    description: The human AE Ace supports and drafts on behalf of.
+    placeholder: Jordan Lee
+    required: true
+
+persona:
+  identity: ./identity.md
+  personality: ./personality.md
+  instructions: ./instructions.md
+
+model:
+  provider: anthropic
+  id: claude-sonnet-4-6
+  temperature: 0.4
+
+skills:
+  - ./skills/crm-hubspot
+  - ./skills/deal-scheduling
+  - ./skills/followups-and-outreach
+
+builtin_skills:
+  - web-search
+
+capabilities:
+  knowledge_base: { enabled: true }
+  scheduling: { enabled: true }
+  tasks: { enabled: true }
+  integrations: { enabled: true }
+  recall: { enabled: true }
+
+knowledge:
+  - path: ./knowledge/sales-playbook.md
+    why: >-
+      The methodology ({{sales_methodology}}), qualification bar, pipeline
+      stages + exit criteria, discovery questions, objection handling, and what
+      Ace may never do (discount, commit terms, send without approval). Edit
+      this to run your motion without touching the persona.
+
+channels:
+  - type: email
+    why: Ace works deal threads and answers "what's the status of the <account> deal".
+
+schedules:
+  - name: Pipeline hygiene sweep
+    cron: "0 8 * * 1-5"
+    timezone: UTC
+    why: Start the day with a pipeline that reflects reality and no deal without a next step.
+    instruction: >-
+      Run the pipeline hygiene pass (crm-hubspot skill). For every open deal:
+      confirm it has a current stage, close date, amount, and a dated next
+      step; flag any deal with no activity in 7+ days or a close date in the
+      past; surface deals missing MEDDIC fields past discovery. Draft the
+      follow-ups for anything that's gone quiet (followups-and-outreach skill)
+      but do not send. Post a short "pipeline at a glance" summary to {{rep_name}}.
+  - name: Pre-meeting prep
+    cron: "0 13 * * 1-5"
+    timezone: UTC
+    why: Walk into every call briefed on the account and the deal.
+    instruction: >-
+      For each customer meeting on {{rep_name}}'s calendar in the next 24h
+      (deal-scheduling skill), pull the deal + contact context from the CRM,
+      do a quick web check on the account, and prepare a one-screen brief:
+      who's in the room, deal stage + amount, the open MEDDIC gaps, and the
+      one outcome to drive. Deliver the briefs together.
+
+integrations:
+  # The CRM is the source of truth — Ace reads and updates deals, contacts,
+  # notes, and tasks here. NOTE: hubspot is on the Nango roadmap; this template
+  # is complete and becomes deployable the moment HubSpot is wired into the
+  # catalog. (See AGENT_ROADMAP.md → pending map.)
+  - service: hubspot
+    required: true
+    why: The system of record — deals, contacts, companies, activity, next steps.
+  # Booking demos, discovery calls, and follow-up meetings.
+  - service: google_calendar
+    required: true
+    why: Schedule demos/calls and prep {{rep_name}} before each one.
+  # Deal threads — Ace reads them and drafts every follow-up/proposal note.
+  - service: gmail
+    required: true
+    why: Read deal threads and draft follow-ups, recaps, and next-step emails.
+
+permissions:
+  read_crm: auto             # reading the pipeline is safe
+  update_crm: auto           # keeping deals/notes/next-steps current is the job
+  read_calendar: auto        # reading the calendar is safe
+  read_inbox: auto           # reading deal threads is safe
+  draft_email: auto          # drafting is fine; SENDING is gated
+  create_task_or_note: auto  # CRM tasks/notes are low-risk + reversible
+  hold_tentative_slot: auto  # pencil-in a demo, marked tentative
+  send_customer_email: ask   # anything the prospect sees needs {{rep_name}}'s yes
+  book_or_move_meeting: ask  # confirming/moving a customer meeting needs approval
+  change_deal_amount_or_stage_to_won: ask  # moving money/marking won needs sign-off
+  offer_discount_or_terms: block  # pricing/terms are never Ace's call

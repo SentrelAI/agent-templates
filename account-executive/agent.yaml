@@ -68,6 +68,7 @@ skills:
   - ./skills/crm
   - ./skills/deal-scheduling
   - ./skills/followups-and-outreach
+  - ./skills/deal-strategy
 
 builtin_skills:
   - web-search

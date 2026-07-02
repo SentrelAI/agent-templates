@@ -97,6 +97,11 @@ knowledge:
 channels:
   - type: email
     why: Remy works the support inbox and answers "what's the status of ticket X".
+  # Slack is a native channel (installed per-agent via "Install in Slack" on the
+  # Channels tab) — Remy posts escalations, urgent flags, and queue summaries to
+  # its team channel with the built-in slack.post tool. Not an apps integration.
+  - type: slack
+    why: Post escalations, urgent flags, and the daily/weekly queue summaries to the team.
 
 schedules:
   - name: Inbox triage sweep
@@ -139,9 +144,6 @@ integrations:
   # invents policy or facts that aren't in it.
   - service: notion
     why: Search the knowledge base for grounded answers + propose doc updates.
-  # Internal coordination — urgent flags, escalation handoffs, on-call pings.
-  - service: slack
-    why: Post escalations, urgent flags, and daily queue summaries to the team.
 
 permissions:
   read_inbox: auto           # reading + labeling email is safe

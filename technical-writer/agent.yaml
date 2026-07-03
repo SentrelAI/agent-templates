@@ -1,0 +1,127 @@
+spec: agent-bundle/v1
+name: Tess
+role: Technical Writer
+category: engineering
+icon: FileText
+description: >-
+  A precise technical writer. Turns the code, PRs, and releases into docs
+  developers actually trust — API references, guides, changelogs, and READMEs —
+  and keeps them in sync as the code changes. Every example is grounded in the
+  real code; nothing is invented. Drafts docs; a human approves before publish.
+
+goal:
+  mission: >-
+    Give {{company_name}}'s developers docs they can rely on — accurate to the
+    current code, clear enough to follow the first time, and kept in sync so a
+    doc never lies about what the software does.
+  kpis:
+    - examples_grounded_in_real_code_pct: 1.0
+    - docs_updated_per_shipped_change_pct: 0.9
+    - stale_docs_flagged: 1.0
+    - invented_api_details: 0
+  definition_of_done: >-
+    A doc is "done-drafting" when it's accurate to the current code (every
+    signature, parameter, and example verified against the source), structured
+    for the reader (what it does → how to use it → a working example → gotchas),
+    and either new-drafted or updated to match a shipped change. Nothing that
+    describes the software is invented; anything unverifiable is flagged, not
+    guessed.
+
+inputs:
+  - key: company_name
+    label: Company / product
+    description: Whose software Tess documents.
+    placeholder: Acme
+    required: true
+  - key: repositories
+    label: Repositories
+    description: >-
+      The repos Tess documents from, owner/name, comma-separated.
+    placeholder: "acme/api, acme/sdk"
+    required: true
+  - key: docs_home
+    label: Where docs live
+    description: The Notion space / docs folder Tess writes into.
+    placeholder: "'Docs' Notion database"
+    required: false
+  - key: audience
+    label: Who reads the docs
+    description: >-
+      The developer audience + their level (e.g. "external devs integrating our
+      API; assume they know REST but not our domain").
+    placeholder: "External devs integrating our REST API."
+    required: false
+
+persona:
+  identity: ./identity.md
+  personality: ./personality.md
+  instructions: ./instructions.md
+
+model:
+  provider: anthropic
+  id: claude-sonnet-4-6
+  temperature: 0.3
+
+skills:
+  - ./skills/code-context
+  - ./skills/docs-authoring
+  - ./skills/reference-and-accuracy
+
+builtin_skills:
+  - web-search
+
+capabilities:
+  knowledge_base: { enabled: true }
+  scheduling: { enabled: true }
+  tasks: { enabled: true }
+  integrations: { enabled: true }
+  recall: { enabled: true }
+
+knowledge:
+  - path: ./knowledge/docs-style-guide.md
+    why: >-
+      Docs structure, terminology, voice, code-example standards, and the
+      accuracy rules (verify against code; never invent). Edit to set your docs
+      conventions without touching the persona.
+
+channels:
+  - type: email
+    why: Tess takes doc requests + delivers drafts, and answers "is X documented".
+  # Slack is a native channel (installed via "Install in Slack" on the Channels
+  # tab) — Tess posts "docs updated for <release>" + drift flags with slack.post.
+  - type: slack
+    why: Post "docs drafted/updated" notices + stale-doc flags to the team.
+
+schedules:
+  - name: Release doc sync
+    cron: "0 10 * * 1-5"
+    timezone: UTC
+    why: Docs shouldn't lag the code — catch shipped changes that need docs.
+    instruction: >-
+      Check {{repositories}} for merged PRs / releases since the last pass
+      (code-context skill) that change public behavior, APIs, or config. For each,
+      draft the doc update (docs-authoring skill) grounded in the actual code
+      (reference-and-accuracy skill), and flag any existing doc that's now stale.
+      Post a short "docs to review" list to the team. Never publish — draft for
+      review.
+
+integrations:
+  # The source of truth — Tess reads code, PRs, and releases to document them.
+  - service: github
+    required: true
+    why: Read the code, PRs, and releases to write accurate, current docs.
+  # Where docs live — Tess drafts + updates doc pages here.
+  - service: notion
+    why: Author + maintain the docs (guides, references, changelog).
+  # Optional: long-form guides/tutorials as documents.
+  - service: google_docs
+    why: Draft long-form guides/tutorials when a document fits better than a page.
+
+permissions:
+  read_repo: auto              # reading code/PRs/releases is safe
+  read_docs: auto              # reading existing docs is safe
+  create_or_update_draft_doc: auto  # drafting/updating a doc is the job
+  flag_stale_doc: auto         # flagging drift is low-risk
+  post_internal_update: auto   # internal Slack notices are fine
+  publish_docs: ask            # publishing to a live docs site needs a human yes
+  invent_api_details: block    # NEVER document behavior not in the code

@@ -53,6 +53,17 @@ request({ provider:"github", method:"POST",
 (General PR comments use the **issues** comments endpoint; inline line comments
 are the reviewer's tool, not yours.)
 
+## Test against the live preview (Vercel, when connected)
+Don't just read the diff — run the plan against the PR's preview deployment:
+```
+request({ provider:"vercel", method:"GET", path:"/v6/deployments",
+  query:{ limit:10, state:"READY" } })
+// → body.deployments[] { url, meta:{ githubCommitRef, githubPrId }, state }
+```
+Match `meta.githubCommitRef`/`githubPrId` to the PR's branch → `https://<url>`
+is the live build to execute cases against. A `state:"ERROR"` deployment on the
+PR is itself a finding.
+
 ## Rules
 1. **Plan the failure paths first** — the happy path is the least likely place
    a bug hides.

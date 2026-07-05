@@ -126,6 +126,9 @@ integrations:
   # Production truth — what's actually failing, and did the fix stop it.
   - service: sentry
     why: Triage new errors, spot regressions, verify a fix stopped the error.
+  # Optional: run test plans against the PR's live preview, not just the diff.
+  - service: vercel
+    why: Find the PR's preview-deployment URL to execute test cases against the real running change.
 
 permissions:
   read_repo: auto              # reading PRs/diffs/commits is safe

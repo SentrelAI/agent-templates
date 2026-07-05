@@ -108,6 +108,15 @@ integrations:
   # Notes, to-dos, and light docs.
   - service: notion
     why: Capture notes + to-dos and keep simple docs (or use built-in tasks).
+  # Optional: look up people — "what's Jordan's email?" answered instantly.
+  - service: google_contacts
+    why: Resolve names to emails/phones when drafting, scheduling, or reminding.
+  # Optional: find that file — "where's the Q3 proposal?"
+  - service: google_drive
+    why: Find and link files/docs on request instead of "check your Drive".
+  # Optional: sync simple to-dos with Google Tasks if that's where yours live.
+  - service: google_tasks
+    why: Keep to-dos in Google Tasks (read + add) if that's your list of record.
 
 permissions:
   read_inbox: auto             # reading + triaging email is safe

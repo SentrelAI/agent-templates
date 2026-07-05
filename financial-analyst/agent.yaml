@@ -114,6 +114,12 @@ integrations:
   - service: google_sheets
     required: true
     why: Build/maintain the financial model, forecast, and variance analysis.
+  # Optional: the board/investor deck draft (numbers only — a human presents).
+  - service: google_slides
+    why: Draft the finance section of the board deck from the model (human approves before it goes anywhere).
+  # Optional: records that feed the analysis when they live in Airtable.
+  - service: airtable
+    why: Read structured records (customers, contracts, headcount plan) that feed the model.
 
 permissions:
   read_stripe: auto            # reading revenue data is safe

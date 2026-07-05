@@ -94,6 +94,11 @@ knowledge:
 channels:
   - type: email
     why: Vera works the inbox and answers "what's on my plate today / move my 2pm".
+  # Slack is a native channel (installed per-agent via "Install in Slack" on the
+  # Channels tab) — Vera coordinates + delivers the brief with the built-in
+  # slack.post tool. Not an apps integration.
+  - type: slack
+    why: Coordinate with the team, nudge follow-ups, and deliver the brief/summary.
 
 schedules:
   - name: Morning brief
@@ -142,8 +147,12 @@ integrations:
     why: Read/arrange the calendar, find times, protect focus + working hours.
   - service: notion
     why: Store briefs, meeting notes, action items, and the running follow-up list.
-  - service: slack
-    why: Coordinate with the team, nudge follow-ups, post the daily brief/summary.
+  # Optional: resolve people instantly — VIP emails, phone numbers, assistants.
+  - service: google_contacts
+    why: Resolve names to emails/numbers when drafting, scheduling, and flagging VIPs.
+  # Optional: pull the doc the meeting is about into the brief.
+  - service: google_drive
+    why: Find and link the relevant docs/decks when prepping meetings and briefs.
 
 permissions:
   read_inbox: auto            # reading + labeling email is safe

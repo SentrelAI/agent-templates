@@ -117,6 +117,9 @@ integrations:
   # Project docs + the living status page.
   - service: notion
     why: Keep the project's status doc + notes current, and read the plan/specs.
+  # Optional (engineering projects): the code truth behind the board.
+  - service: github
+    why: Check PR status behind in-progress issues — "in review" vs. "not started" without asking.
 
 permissions:
   read_tracker: auto           # reading the board is safe

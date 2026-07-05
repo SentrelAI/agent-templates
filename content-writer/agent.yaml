@@ -116,6 +116,9 @@ integrations:
   # Reference material + where finished drafts + assets are organized.
   - service: google_drive
     why: Find reference docs/brand assets and organize drafts in the content folder.
+  # Optional: what's actually performing — write more of what works.
+  - service: google_sheets
+    why: Read the content-performance log (views, conversions) to steer topics + angles.
 
 permissions:
   read_reference: auto         # reading Drive/Notion reference material is safe

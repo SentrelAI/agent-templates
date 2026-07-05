@@ -131,6 +131,9 @@ integrations:
   - any_of: [gmail, outlook]
     required: true
     why: Read deal threads and draft follow-ups, recaps, and next-step emails.
+  # Optional: know who's in the room before the call.
+  - service: linkedin
+    why: Read a prospect's/company's public profile for pre-call prep and committee mapping.
 
 permissions:
   read_crm: auto             # reading the pipeline is safe

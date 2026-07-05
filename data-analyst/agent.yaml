@@ -114,6 +114,9 @@ integrations:
   - any_of: [google_sheets, airtable]
     required: true
     why: Read source data + write reproducible analysis results back.
+  # Optional: survey/form responses are a common analysis source.
+  - service: google_forms
+    why: Pull form/survey responses as a data source (NPS, feedback, sign-up surveys).
 
 permissions:
   read_data: auto              # reading spreadsheets/records is safe

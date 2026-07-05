@@ -28,6 +28,19 @@ request({ provider:"notion", method, path, query?, body? })
 (No Notion connected? Keep notes/to-dos in the built-in tasks + tell {{user_name}}
 that connecting Notion would make them searchable.)
 
+## Look up people & files (when connected)
+- **Google Contacts** — resolve "Jordan" to a real email/phone before drafting
+  or scheduling:
+  `request({ provider:"google_contacts", method:"GET", path:"/people:searchContacts", query:{ query:"Jordan", readMask:"names,emailAddresses,phoneNumbers" } })`
+  → `body.results[].person`. (Base is `https://people.googleapis.com/v1`.)
+- **Google Drive** — find that file: `request({ provider:"google_drive",
+  method:"GET", path:"/files", query:{ q:"name contains 'Q3 proposal' and trashed = false", fields:"files(id,name,webViewLink)" } })`
+  → link `webViewLink` in your answer.
+- **Google Tasks** — if that's {{user_name}}'s list of record: lists via
+  `GET /users/@me/lists`, then `GET /lists/<listId>/tasks` to read and
+  `POST /lists/<listId>/tasks { title, due }` to add. (Base already includes
+  `/tasks/v1`.)
+
 ## Look things up (web-search)
 When asked "find out…" / "what's…", use **web-search**, then answer with the
 **short version + the source** — not a wall of links. If it's uncertain or the

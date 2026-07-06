@@ -23,6 +23,16 @@ Keep it scannable — a screen, not a scroll. Draft the email; it goes out per
 the schedule to {{principal_name}} only (internal), so it doesn't need approval
 the way outbound-to-others does.
 
+## Resolve people + pull the doc (when connected)
+- **Google Contacts** — resolve who someone is / their email before drafting or
+  flagging VIPs: `request({ provider:"google_contacts", method:"GET",
+  path:"/people:searchContacts", query:{ query:"<name>", readMask:"names,emailAddresses,organizations" } })`.
+- **Google Drive** — attach the doc the meeting is about:
+  `request({ provider:"google_drive", method:"GET", path:"/files",
+  query:{ q:"fullText contains '<topic>' and trashed = false", fields:"files(id,name,webViewLink,modifiedTime)", orderBy:"modifiedTime desc" } })`
+  → put `webViewLink` in the brief so {{principal_name}} is one click from the
+  material.
+
 ## Per-meeting prep
 For each meeting, gather:
 - **Prior context** — search past notes + threads. Read relevant Notion notes:

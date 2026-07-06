@@ -131,6 +131,12 @@ integrations:
   # InMail need LinkedIn's gated Recruiter/Talent API — not available here.
   - service: linkedin
     why: Post an open role / read a candidate's public profile (no search/InMail).
+  # Optional: a structured application-intake form feeding the pipeline.
+  - service: google_forms
+    why: Pull structured application-form responses straight into the pipeline.
+  # Optional: hiring reports the team can slice.
+  - service: google_sheets
+    why: Export pipeline/funnel reports (per stage, time-in-stage) for the hiring team.
 
 permissions:
   read_inbox: auto             # reading applications + replies is safe

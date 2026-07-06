@@ -124,6 +124,9 @@ integrations:
   # Know whether a PR touches code that's currently throwing errors in prod.
   - service: sentry
     why: Check active errors in the files a PR changes — extra scrutiny there.
+  # Optional: see the PR's preview deployment before judging UI/behavior changes.
+  - service: vercel
+    why: Read the PR's preview-deployment status/URL to review the change running, not just the diff.
 
 permissions:
   read_repo: auto              # reading PRs, diffs, files is safe

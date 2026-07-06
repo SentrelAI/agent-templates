@@ -93,6 +93,11 @@ integrations:
   # Read source documents (PDFs, decks, prior reports) + store finished reports.
   - service: google_drive
     why: Read internal/source documents and organize finished reports.
+  # Optional: long-form deliverables + data tables when the ask warrants them.
+  - service: google_docs
+    why: Deliver a long-form report as a document when a Notion page doesn't fit.
+  - service: google_sheets
+    why: Lay out comparison tables/datasets (market sizing, vendor matrices) behind a report.
 
 permissions:
   research_web: auto           # web research is read-only

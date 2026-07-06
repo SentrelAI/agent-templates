@@ -136,6 +136,9 @@ integrations:
     why: Error monitoring — the stream of new and escalating issues to triage.
   - service: linear
     why: Bug tickets in; PR links, analyses, and status updates out.
+  # Optional: check the fix on its preview deployment before calling it done.
+  - service: vercel
+    why: Read the fix PR's preview-deployment status/URL to verify the repro passes on a live build.
 
 secrets: []
 

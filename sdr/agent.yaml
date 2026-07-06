@@ -61,6 +61,9 @@ integrations:
     why: Warm email sending — sequences, deliverability, inbox rotation.
   - service: linkedin          # provider slug: linkedin
     why: Prospect research and social touches (gated API — see skill).
+  # Optional: work replies in the real inbox when outreach isn't via Instantly.
+  - any_of: [gmail, outlook]
+    why: Read prospect replies and draft responses in the mailbox of record.
 
 # Secrets are not declared here: the runtime injects each connected app's
 # token automatically when the agent calls mcp__apps__request. No API

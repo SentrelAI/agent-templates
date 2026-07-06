@@ -125,6 +125,9 @@ integrations:
     why: Availability checks, event creation, travel blocks, attendee management.
   - service: gmail
     why: Reading request threads, sending proposals, follow-ups, and confirmations.
+  # Optional: resolve "book time with Jordan" to the right invitee instantly.
+  - service: google_contacts
+    why: Resolve attendee names to email addresses when booking and inviting.
 
 secrets: []
 

@@ -47,6 +47,22 @@ Email the fuller monthly pack (budget-vs-actual table + forecast deltas) to the
 team; anything going to a **board/investor** is `share_externally` → a human
 approves first.
 
+## The board-deck draft (Google Slides, when connected)
+For board/investor cycles, draft the finance section as slides — numbers from
+the model, nothing invented, and it goes **nowhere without a human**:
+```
+request({ provider:"google_slides", method:"POST", path:"/presentations",
+  body:{ title:"Board deck — finance (draft)" } })   // → body.presentationId
+request({ provider:"google_slides", method:"POST", path:"/presentations/<id>:batchUpdate",
+  body:{ requests:[
+    { createSlide:{ slideLayoutReference:{ predefinedLayout:"TITLE_AND_BODY" } } },
+    { insertText:{ objectId:"<placeholderId>", text:"MRR $128k (+3.1% MoM) · NRR 104% · Runway 14mo" } } ] } })
+```
+(Read `body.slides[].pageElements[].objectId` from `GET /presentations/<id>` to
+target placeholders. Base already includes `/v1`.) One slide per message: the
+metric headline, the variance story, the runway picture — sourced from the
+model, linked back to it.
+
 ## Rules
 1. **Every material variance gets a why** — or an explicit "unexplained, flagged."
 2. **Runway on cash**, definition stated, plan-vs-trend both shown.

@@ -117,6 +117,9 @@ integrations:
   # Structured notes: decisions + action items with owners, kept findable.
   - service: notion
     why: Store meeting notes, decisions, and the action-item tracker.
+  # Optional: formal minutes/agendas as shareable documents (board, external).
+  - service: google_docs
+    why: Produce formal agendas/minutes as documents when a meeting warrants them (board, client).
 
 permissions:
   read_calendar: auto          # reading meetings is safe

@@ -113,6 +113,21 @@ Leave it as a draft — do **not** POST `/me/messages/<draftId>/send`. Use
 
 ---
 
+## Billing triage — look up the customer's reality (Stripe, when connected)
+For billing tickets, check what's actually true before drafting — **read-only**
+(refunds/changes stay blocked and go to a human):
+```
+request({ provider:"stripe", method:"GET", path:"/v1/customers/search",
+  query:{ query:"email:'customer@x.com'" } })          // → body.data[0].id
+request({ provider:"stripe", method:"GET", path:"/v1/subscriptions",
+  query:{ customer:"<cus_id>", status:"all", limit:5 } })   // plan + status
+request({ provider:"stripe", method:"GET", path:"/v1/invoices",
+  query:{ customer:"<cus_id>", limit:5 } })            // recent charges/failures
+```
+Amounts are in cents. Now the draft says "your March invoice failed on the card
+ending 4242" instead of guessing — and the refund decision goes to a human with
+the facts attached.
+
 ## Rules (both providers)
 
 1. **Read the whole thread first** — never reply off the last message alone.

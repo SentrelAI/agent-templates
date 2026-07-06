@@ -115,6 +115,9 @@ integrations:
   # Contracts and counterparty threads arrive by email.
   - any_of: [gmail, outlook]
     why: Catch incoming contracts/amendments and draft (on approval) replies to counterparties.
+  # Optional: the review memo / redline suggestions as a shareable document for counsel.
+  - service: google_docs
+    why: Draft the review memo + suggested redlines as a document counsel can work in.
 
 permissions:
   read_contracts: auto         # reading agreements is safe

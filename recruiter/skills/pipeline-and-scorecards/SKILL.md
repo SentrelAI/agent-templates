@@ -55,6 +55,18 @@ request({ provider:"notion", method:"PATCH", path:"/v1/blocks/<candidatePageId>/
 **Never** record anything about a protected characteristic — only evidence of the
 work.
 
+## Application intake from Google Forms (when connected)
+If applications come through a form, pull new responses straight into the
+pipeline instead of waiting on email:
+```
+request({ provider:"google_forms", method:"GET", path:"/forms/<formId>/responses",
+  query:{ filter:"timestamp > <last-check RFC3339>" } })
+// → body.responses[] .answers keyed by questionId
+```
+(Map questionIds once via `GET /forms/<formId>` → `items[]`.) Each new response
+becomes a candidate row + a screen against the scorecard — same discipline as
+any other source. Base already includes `/v1`.
+
 ## Rules
 1. **Nobody in limbo.** Sort by last activity every sweep; the longest-waiting
    candidate gets a drafted next step first.

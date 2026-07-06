@@ -139,6 +139,9 @@ integrations:
   # runs through the dedicated mcp__meta_ads__* MCP, not the apps proxy.
   - service: meta_ads
     why: Launch, optimize, pause, and report on Meta (FB/IG) ad campaigns.
+  # Optional: the brand's asset library — logos, product shots, past creative.
+  - service: google_drive
+    why: Pull brand assets (logos, product shots, templates) into creative + reuse past winners.
 
 # Creative generation key (optional). With this set, image/video generation
 # uses Higgsfield; without it, the agent falls back to whatever gen provider

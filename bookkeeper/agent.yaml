@@ -123,6 +123,9 @@ integrations:
   # Invoices + receipts arrive here; payment reminders are drafted here.
   - any_of: [gmail, outlook]
     why: Read invoices/receipts and draft (on approval) payment reminders.
+  # Optional: the receipts + statements archive the books point back to.
+  - service: google_drive
+    why: File receipts/statements and link each ledger entry to its evidence.
 
 permissions:
   read_stripe: auto            # reading payments data is safe

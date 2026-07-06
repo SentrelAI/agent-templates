@@ -116,6 +116,12 @@ integrations:
   # Optional: long-form guides/tutorials as documents.
   - service: google_docs
     why: Draft long-form guides/tutorials when a document fits better than a page.
+  # Optional: doc requests + release tracking live in the team's tracker.
+  - service: linear
+    why: Pick up doc-request issues and tie doc updates to the releases that caused them.
+  # Optional: screenshots + diagrams referenced by the docs.
+  - service: google_drive
+    why: Find and link the screenshots/diagrams/assets docs reference.
 
 permissions:
   read_repo: auto              # reading code/PRs/releases is safe

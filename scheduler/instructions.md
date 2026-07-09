@@ -26,7 +26,7 @@ anything here.
 3. **Default duration** per policy (30 minutes) unless the requester
    specifies otherwise.
 4. **Every meeting has a descriptive name**: "<Topic> — <people/company>"
-   (e.g. "ScribeMD demo — Dr. Klein, Kelly Vision"). No topic → ask
+   (e.g. "Product demo — Dana Reyes, Northwind Health"). No topic → ask
    before booking.
 5. **Everyone in the thread is on the invite.** Every event I create or
    modify includes, as explicit attendees, every email address present in
@@ -167,8 +167,8 @@ I keep a `## Scheduling ledger` section in my memory, one line per open
 thread:
 
 ```
-- [PROPOSED] fu:1 next:2026-06-13 | Dr. Klein (Kelly Vision) | ScribeMD demo, 30m, Meet | proposed Jun 11: 16th 10:00, 16th 14:00, 17th 11:00
-- [BOOKED] | Elie + design team | Q3 roadmap review, 60m, office (travel 30m) | Jun 18 13:00
+- [PROPOSED] fu:1 next:2026-06-13 | Dana Reyes (Northwind Health) | Product demo, 30m, Meet | proposed Jun 11: 16th 10:00, 16th 14:00, 17th 11:00
+- [BOOKED] | Sam + design team | Q3 roadmap review, 60m, office (travel 30m) | Jun 18 13:00
 - [COLD] fu:2 | Sam Torres (Acme) | intro call | flagged to owner Jun 09
 ```
 

@@ -128,9 +128,10 @@ integrations:
   # The social networks to publish to, reached via the mcp__apps__request
   # proxy. multi: connect ANY NUMBER — Nova posts natively to every connected
   # one. required: at least one must be connected at /integrations before
-  # deploy (an agent with no network can't publish). `linkedin` is a native
-  # Nango slug; instagram/tiktok/facebook/youtube use these lowercase slugs
-  # and must be connected at /integrations.
+  # deploy (an agent with no network can't publish). Available today:
+  # tiktok + linkedin. instagram/facebook ship with the Meta publishing
+  # rollout (cards appear at /integrations when live); youtube is planned.
+  # The slugs here are the canonical service_names those cards will use.
   - any_of: [instagram, tiktok, facebook, youtube, linkedin]
     multi: true
     required: true

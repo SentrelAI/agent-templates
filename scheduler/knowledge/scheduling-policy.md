@@ -45,6 +45,6 @@ persona references these values; edit here, not there.
 
 `<Topic> — <people/company>`
 Examples:
-- "ScribeMD demo — Dr. Klein, Kelly Vision"
-- "Q3 roadmap review — Elie + design"
+- "Product demo — Dana Reyes, Northwind Health"
+- "Q3 roadmap review — Sam + design"
 - "Intro call — Sam Torres, Acme"

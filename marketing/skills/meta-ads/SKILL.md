@@ -31,10 +31,11 @@ Read the offer/brief and decide if it's any of these. If so, pass
 | Employment | `EMPLOYMENT` | Job openings, hiring, recruiting, internships, career fairs |
 | Social issues, elections or politics | `ISSUES_ELECTIONS_POLITICS` | Political/social-issue advocacy, candidates, ballot measures, legislation |
 
-**ScribeMD note:** ScribeMD is healthcare / clinician-facing. Most product
-ads are NOT special-category, **but any ad recruiting clinicians (hiring,
-"join our team", "now hiring nurses/MDs") IS Employment** — declare
-`EMPLOYMENT`.
+**Common trap:** a normal product ad is NOT special-category just because
+the brand serves a regulated audience — **but any ad that recruits (hiring,
+"join our team", "now hiring") IS Employment**, and anything about credit,
+housing, or politics needs its category too. When in doubt, declare it and
+say so in the approval.
 
 When a category applies, **warn the human in the approval** that targeting is
 restricted and adjust the ad set accordingly:

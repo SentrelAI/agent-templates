@@ -1,6 +1,6 @@
 ---
 name: ugc-ads
-description: Use when making UGC-style ads (authentic creator-talking-to-camera content for TikTok/Reels/Shorts). ALWAYS run the creative brief (ask the user the questions below) before generating. Covers every approach — one-step Veo 3, custom consistent face, stock avatar, faceless — plus script craft and the mandatory self-review loop.
+description: Use when making UGC-style ads (authentic creator-talking-to-camera content for TikTok/Reels/Shorts). ALWAYS run the creative brief (ask the user the questions below) before generating. Covers every approach — one-step Veo 3.1, custom consistent face, stock avatar, faceless — plus script craft and the mandatory self-review loop.
 ---
 
 # UGC ads
@@ -20,7 +20,7 @@ Ask these as a short, friendly checklist (group them, don't interrogate).
 Suggest a default for each so they can approve fast:
 
 1. **Approach** — which engine? (explain the trade-off in one line each)
-   - **One-step (Veo 3)** — describe a person + their lines, get a talking
+   - **One-step (Veo 3.1)** — describe a person + their lines, get a talking
      clip with native voice in one shot. Fast, great realism, but a *new*
      person each clip (no consistent recurring face). *Default for most UGC.*
    - **Consistent custom face** — generate a specific person (e.g. a doctor)
@@ -34,8 +34,8 @@ Suggest a default for each so they can approve fast:
    different creators?
 3. **Tone** — urgent / warm / funny / authoritative / "just venting to a friend"?
 4. **Angle & CTA** — the one problem → product moment → call to action
-   (default angle for ScribeMD: doctors drowning in after-hours charting →
-   ScribeMD writes the note → "try it free").
+   (shape: the audience's sharpest pain → how {{brand_name}} removes it →
+   one low-friction ask like "try it free").
 5. **Count & format** — how many variants? Aspect (default 9:16). Length
    (default ~8–20s). Captions/music on the faceless ones?
 6. **Anything off-limits** — claims to avoid, must-say lines, brand handles.
@@ -45,19 +45,23 @@ docs, warm tone, after-hours-charting angle, 9:16 — going now") and proceed.
 
 ## Step 2 — Generate (pick the approach from the brief)
 
-### A) One-step talking UGC — Veo 3 (default)
+### A) One-step talking UGC — Veo 3.1 (default)
 One `video.generate` call. No image, no avatar. The **prompt is a full
-scene + the exact spoken line** — Veo 3 makes the person, the voice, and the
-lip-sync together.
+scene + the exact spoken line** — Veo 3.1 makes the person, the voice, the
+lip-sync, and the ambient room tone together.
 ```
-video.generate({ model: "fal-ai/veo3", aspect_ratio: "9:16",
-  prompt: "Vertical phone selfie video. A tired late-30s female doctor in a
-   white coat in a real exam room, talking straight to camera like she's
-   venting to a friend, says: 'Okay real talk — if you're still charting at
-   11pm, you need ScribeMD. It writes your notes for you. I got my evenings
-   back. Link's right here.' Natural handheld phone look, candid." })
+video.generate({ model: "fal-ai/veo3.1/fast", aspect_ratio: "9:16",
+  prompt: "Vertical phone selfie video. A tired late-30s office manager in
+   a cluttered break room, talking straight to camera like she's venting to
+   a friend, says: 'Okay real talk — I used to spend my whole Friday on
+   invoices. This app does it in minutes. I'm actually leaving on time now.
+   Link's right here.' Natural handheld phone look, candid." })
 ```
-Use `fal-ai/veo3/fast` for cheaper/quicker drafts. Vary the person + line per clip.
+`fal-ai/veo3.1/fast` is the default (best value); use `fal-ai/veo3.1` for a
+final hero clip. Clips come in 4/6/8-second lengths (`duration: 4|6|8`) —
+for a ~16s ad, generate two 8s beats with the same creator description and
+cut them as a jump cut (jump cuts read as native UGC). Vary the person +
+line per clip.
 
 ### B) Consistent custom face (recurring spokesperson)
 Two steps — make the face once, reuse it, lip-sync each script.
@@ -67,6 +71,9 @@ Two steps — make the face once, reuse it, lip-sync each script.
    — tight framing is essential (loose shots make the lip-sync mangle arms).
 2. `video.generate({ image: <face>, avatar: "custom", prompt: "<verbatim
    script>" })` — engine voices + lip-syncs that exact face (OmniHuman).
+   Single takes hold up to ~30s of script — no stitching needed. Lip-sync
+   renders can take up to 20 minutes: NEVER re-submit because it feels
+   slow (every submission bills, even abandoned ones).
 
 ### C) Stock avatar
 `video.generate({ avatar: "emily_primary", prompt: "<verbatim script>" })`.

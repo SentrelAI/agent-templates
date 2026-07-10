@@ -1,8 +1,9 @@
-# SDR example bundle — "Sarah"
+# Sarah — Sales Development Rep
 
-The canonical Agent Bundle: a complete outbound SDR defined as a folder.
-This is the "Dockerfile of AI agents" idea in practice — everything the
-agent *is* lives in versionable plain files; everything secret stays out.
+Outbound SDR: builds targeted lead lists with Apollo, personalizes with
+LinkedIn + news research, runs warm sequences through Instantly, and books
+qualified meetings for your AE. Everything she *is* lives in these files;
+secrets stay out (tokens are injected per connected app at runtime).
 
 ```
 sdr/
@@ -44,19 +45,9 @@ in this bundle. Connect each app once at `/integrations`.
 - No credentials live in the bundle: connected apps inject their tokens
   at call time through `mcp__apps__request`.
 
-## Try it
+## Before deploying
 
-```sh
-node bin/validate.mjs examples/sdr
-```
-
-Deploy it via the sentrel wizard:
-
-```sh
-npx @manifestagent/agentmanifest deploy examples/sdr
-```
-
-Before deploying for real: replace the bracketed sections of
+Deploy Sarah from the Templates page. Then: replace the bracketed sections of
 `knowledge/pitch-deck.md` with your actual deck, and connect Apollo,
 Instantly, and LinkedIn at `/integrations` (Instantly is a paste-token
 connect — there's no Nango template for it).

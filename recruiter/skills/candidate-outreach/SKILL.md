@@ -24,9 +24,12 @@ request({ provider, method, path, query?, body? })
 - **Gmail:** `GET /gmail/v1/users/me/messages?q=to:{{hiring_email}} newer_than:14d`,
   then `GET /gmail/v1/users/me/threads/<threadId>?format=full`. Resumes are
   attachments — `GET /gmail/v1/users/me/messages/<id>/attachments/<attId>`.
-- **Outlook:** `GET /me/messages?$search="applied"&$top=25`, thread by
-  `$filter=conversationId eq '<id>'`; attachments at
-  `GET /me/messages/<id>/attachments`.
+- **Outlook:** `GET /me/messages?$top=25&$orderby=receivedDateTime desc`
+  and identify application threads from subject/sender/attachments — do NOT
+  filter on a keyword like "applied"; most applications never contain it.
+  (`$search` can't combine with `$orderby`/`$filter`; page via
+  `@odata.nextLink`.) Thread by `$filter=conversationId eq '<id>'`;
+  attachments at `GET /me/messages/<id>/attachments`.
 
 ## Draft outreach / replies / declines (never send)
 Personalize — reference the candidate's real work + why the role fits; short and
@@ -53,3 +56,15 @@ human. Create a **draft** on the thread:
 4. **Screen on evidence of the work only** — never note or ask anything about a
    protected characteristic (see the playbook).
 5. **Thread correctly** and log the touch + the screen note (pipeline skill).
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

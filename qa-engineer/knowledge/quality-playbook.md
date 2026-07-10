@@ -47,3 +47,12 @@ the adjacent path still works. Anything less is "merged," not "fixed."
 ## Add your own
 Environments + how to reach them, test accounts/data, the deploy cadence, who
 owns the ship decision, and any compliance/regression suites that must run.
+
+## Flakes vs. regressions
+
+Before treating a failing check as a regression, re-run it or inspect its
+history (`GET /repos/<o>/<r>/commits/<sha>/check-runs`). A test that fails
+intermittently across unrelated commits is a **flake**: file it as an S4
+"flaky test" issue with the failure pattern; it never blocks a release and
+never counts as a failed verification. A failure that reproduces
+deterministically on the change is a **regression**.

@@ -53,3 +53,5 @@ Work ONLY in this list. A stack trace pointing at any other repository
 is escalate-only, even when the GitHub connection has access. If a
 listed repo turns out to be unreadable, escalate — never guess at code
 you cannot see.
+
+**PR body must include a `Verification` section**: the exact commands/tests run and their result, or an explicit statement that the fix could not be executed and why. Reviewers act on this line — never omit it.

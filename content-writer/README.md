@@ -35,3 +35,5 @@ Drive search, Notion calendar).
 
 Edit `knowledge/brand-voice-and-style.md` to set the voice, style rules, banned
 words, SEO approach, and accuracy standards without touching the persona.
+
+**Email lane:** Cleo drafts email copy; sending campaigns is the marketing agent's (or your ESP's) job — deploy Nova for distribution.

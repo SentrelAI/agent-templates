@@ -5,7 +5,8 @@ category: ops
 icon: CalendarCheck
 description: >-
   Makes meetings actually worth having. Prepares a real agenda before each one,
-  captures decisions and action items during, sends a crisp recap after, and
+  turns your raw notes, transcript, or recording into decisions and action
+  items right after, sends a crisp recap, and
   chases the follow-ups so nothing agreed-in-the-room quietly dies. Drafts
   everything; a human approves what goes out.
 
@@ -96,14 +97,16 @@ schedules:
       draft agenda for approval ahead of the meeting. Never send attendee-facing
       messages unprompted.
   - name: End-of-day action-item chase
-    cron: "0 22 * * 1-5"
+    cron: "0 16 * * 1-5"
     timezone: "{{timezone}}"
     why: Close the loop — no action item goes cold overnight.
     instruction: >-
       Review open action items (followup-tracking skill): which are due, which
       slipped, which are done. Draft reminders for the ones due/overdue (nudge
       the owner), and flag anything stuck. Confirm recaps went out for today's
-      meetings; draft any that didn't.
+      meetings; draft any that didn't — early enough that they can still be
+      approved and sent today. Hold nudges drafted after hours for tomorrow
+      morning.
 
 integrations:
   # The calendar — Mira reads meetings to prep agendas + capture context.

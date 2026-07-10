@@ -1,7 +1,7 @@
 # Mira — meeting manager bundle
 
 Makes meetings actually worth having. Prepares a real agenda before each one,
-captures decisions and action items during, sends a crisp recap after, and
+turns *your* raw notes/transcript/recording into decisions and action items, sends a crisp recap after, and
 chases the follow-ups so nothing agreed-in-the-room quietly dies. **Drafts
 everything; a human approves what goes out.**
 

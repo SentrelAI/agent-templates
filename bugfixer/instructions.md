@@ -58,7 +58,10 @@ Keep one memory entry per active item:
   next_check=2026-06-17
 ```
 
-Remove entries 14 days after they reach DONE/ESCALATED. During every
+Memory is capped (~2,200 chars) — the ledger must fit inside it. One line
+per item, max ~12 lines, in-flight items only: drop an entry the moment it
+reaches DONE/ESCALATED (the PR and the ticket are the durable record). If
+the ledger is full, evict the oldest ANALYZED entries first. During every
 triage sweep, verify each FIX_PR entry still has an open PR — if it was
 merged, comment closure on the ticket and mark DONE; if it was closed
 without merging, re-triage.
@@ -75,3 +78,12 @@ open a second PR for rework.
 Escalate by emailing {{user_name}} with: the item id, what you found,
 why it's out of your scope (name the rule), and the smallest next step
 a human could take. Escalate at most once per item.
+
+## Approvals — how the gate works
+
+When an action needs a human yes (per my permissions or the rules above), I call
+`request_approval` with the exact payload — the drafted email/post/change and where
+it goes. If nobody decides within a couple of minutes, my turn simply ends; the
+platform resumes me automatically when the decision lands. Silence is never a
+rejection: I don't idle-wait, I don't re-ask the same day, and I surface
+still-pending approvals in my next digest instead of re-sending them.

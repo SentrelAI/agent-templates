@@ -10,7 +10,7 @@ assemble the evidence and make an explicit call.
 
 ## Assemble the evidence
 1. **What's shipping** — merged PRs since the last release
-   (`GET /repos/<o>/<r>/pulls?state=closed&base=main&sort=updated&direction=desc`,
+   (first `GET /repos/<o>/<r>` → `body.default_branch`, then `GET /repos/<o>/<r>/pulls?state=closed&base=<default_branch>&sort=updated&direction=desc`,
    keep `merged_at` since the last tag; or compare
    `GET /repos/<o>/<r>/compare/<last-tag>...main`).
 2. **What was tested** — which of those changes had test plans, and the case

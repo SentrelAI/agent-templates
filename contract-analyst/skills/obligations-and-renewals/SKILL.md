@@ -44,10 +44,15 @@ Query for anything moving in the next 60 days:
 ```
 request({ provider:"notion", method:"POST", path:"/v1/databases/<contractsDbId>/query",
   body:{ filter:{ or:[
-    { property:"Notice deadline", date:{ next_month:{} } },
-    { property:"Term end", date:{ next_month:{} } } ] },
+    { and:[ { property:"Notice deadline", date:{ on_or_after:"<today>" } },
+            { property:"Notice deadline", date:{ on_or_before:"<today+60d>" } } ] },
+    { and:[ { property:"Term end", date:{ on_or_after:"<today>" } },
+            { property:"Term end", date:{ on_or_before:"<today+60d>" } } ] } ] },
     sorts:[{ property:"Notice deadline", direction:"ascending" }] } })
 ```
+The window is 60 days — `next_month` only covers 30 and misses long notice
+periods. If `body.has_more`, re-query with `start_cursor: body.next_cursor`
+until it's false: a truncated sweep is a missed auto-renewal.
 Also set a built-in task/reminder at logging time for **before** each notice
 window (e.g. 30 days ahead) — the sweep is the net; the reminder is the alarm.
 
@@ -69,3 +74,15 @@ not just a date.
    with what's negotiable now vs. locked later.
 5. **The log row is the radar; the contract page is the file** — both stay
    current.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

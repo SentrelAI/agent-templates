@@ -81,3 +81,5 @@ request({ provider:"github", method:"POST",
    nits.
 5. **Inline lines must be in the diff** — whole-file / architectural points go in
    the review `body`, not a phantom line comment.
+
+- **Re-review check:** `GET /repos/<o>/<r>/pulls/<n>/reviews` — if one of your reviews has `commit_id` == the PR's current `head.sha`, you already reviewed this state; skip it.

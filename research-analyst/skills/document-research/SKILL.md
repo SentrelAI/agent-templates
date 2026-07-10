@@ -17,7 +17,7 @@ request({ provider:"google_drive", method:"GET", path:"/files",
 // → body.files[] { id, name, mimeType }
 ```
 - **Base is `https://www.googleapis.com/drive/v3`** (versioned → relative paths).
-- Read a plain file: `GET /files/<id>?alt=media`.
+- Read a plain file: `GET /files/<id>?alt=media`. PDFs/images: download via `GET /files/<id>?alt=media` **to a workspace file**, then open it with the Read tool — it reads PDFs and images natively, including scanned signature pages. Never try to parse raw binary from the proxy response.
 - **Google-native files** (Docs/Sheets/Slides) must be **exported**, not
   downloaded: `GET /files/<id>/export?mimeType=text/plain` (Docs) or
   `text/csv` (Sheets). `fullText contains` searches inside file contents.
@@ -47,3 +47,15 @@ request({ provider:"notion", method:"GET", path:"/v1/blocks/<pageId>/children", 
 3. **Cite internal sources too**, with date + confidence.
 4. **Recency matters** — a 2-year-old internal doc can be as wrong as an old web
    page; note the date.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

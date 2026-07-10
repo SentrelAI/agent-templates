@@ -33,6 +33,17 @@ goal:
 # goal. timezone drives BOTH when the cron jobs fire and the booking
 # window, so the whole agent operates in the owner's local time.
 inputs:
+  - key: user_name
+    label: Who you schedule for
+    placeholder: Alex Rivera
+    required: true
+  - key: company_name
+    label: Company
+    description: >-
+      Attendees with this company's domain are internal; everyone else is
+      external (drives the written-yes rule and day-before confirmations).
+    placeholder: Acme
+    required: true
   - key: timezone
     label: Time zone (Pacific by default)
     description: >-
@@ -96,7 +107,7 @@ schedules:
       hygiene: review the scheduling ledger in memory; verify every
       PROPOSED thread has a future follow-up check scheduled (recreate
       any that are missing), and remove BOOKED/DECLINED/COLD entries
-      older than 14 days. Do this work silently — do NOT email
+      that are closed (BOOKED/DECLINED) or already digested (COLD). Do this work silently — do NOT email
       {{user_name}}. Anything worth surfacing is rolled into the daily
       digest below.
   - name: Daily digest

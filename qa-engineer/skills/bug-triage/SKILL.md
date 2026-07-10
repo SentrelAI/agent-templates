@@ -43,7 +43,12 @@ Severity from the matrix in `quality-playbook.md` — defensible, both direction
 Priority mapping: S1→urgent(1), S2→high(2), S3→medium(3), S4→low(4).
 
 ## Verify the fix (merged ≠ fixed)
-1. Re-run the **original repro** against the fixed build.
+1. Re-run the **original repro** against the fixed build — execute, don't
+   infer. Use your workspace: clone the repo (public) and run the relevant
+   tests, or script the API repro (`curl`) against the preview/staging URL.
+   A repro you cannot execute (UI-only, no test env) is marked
+   **needs human verification** on the issue — never counted as verified
+   from reading the diff.
 2. Sentry trend: `query:"is:unresolved <error>"` — did events stop after the
    deploy? A fix with the error still firing isn't a fix.
 3. Spot-check the adjacent path for the classic regression.
@@ -58,3 +63,15 @@ Priority mapping: S1→urgent(1), S2→high(2), S3→medium(3), S4→low(4).
 4. **Verify against the original repro + the error trend** before recommending
    close.
 5. **Sentry is read-only; Linear is where state lives.**
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

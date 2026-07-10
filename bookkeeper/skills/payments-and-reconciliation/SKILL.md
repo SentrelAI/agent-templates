@@ -56,3 +56,15 @@ Surface flags with the ids + amounts; a human resolves them.
 4. **Balance transactions are the source of truth** — reconcile against them,
    including fees.
 5. **Flag, don't fudge** — a mismatch is surfaced, never smoothed over.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

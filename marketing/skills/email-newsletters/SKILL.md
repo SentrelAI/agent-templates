@@ -41,7 +41,7 @@ up and sends it from your address.
 |----------|-----|
 | Anything **as yourself** — a note, a lifecycle email, a small segment | **your outbox** (above) — default |
 | A **true bulk newsletter** to a managed list (unsubscribe, deliverability, reporting) | a connected **ESP** (Mailchimp / SendGrid / Customer.io) via the `request` proxy |
-| Sending **from a specific person's mailbox** (the owner's actual Gmail, reading their inbox) | the connected **Gmail** (`provider: "google-mail"`) |
+| Sending **from a specific person's mailbox** (the owner's actual Gmail, reading their inbox) | the connected **Gmail** (`provider: "gmail"`) |
 
 Don't fan out hundreds of individual outbox/Gmail sends for a real blast — that's
 what an ESP is for (list management + deliverability + unsubscribe handling).
@@ -80,3 +80,15 @@ holds: draft, preview, then a gated send.
    Never import a purchased or scraped list.
 5. **Report results.** After a send, pull the ESP campaign report (opens/clicks/
    bounces) and include it in the weekly report alongside social and ad numbers.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

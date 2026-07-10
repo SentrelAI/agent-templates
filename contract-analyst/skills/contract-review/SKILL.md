@@ -15,7 +15,7 @@ request({ provider:"google_drive", method:"GET", path:"/files",
           fields:"files(id,name,mimeType,modifiedTime)", orderBy:"modifiedTime desc", pageSize:20 } })
 ```
 - **Base `https://www.googleapis.com/drive/v3`** (versioned → relative paths).
-- **PDFs / Word files:** `GET /files/<id>?alt=media` (binary → extract the text).
+- **PDFs / Word files:** download via `GET /files/<id>?alt=media` **to a workspace file**, then open it with the Read tool — it reads PDFs and images natively, including scanned signature pages. Never try to parse raw binary from the proxy response.
 - **Google Docs:** must be **exported** — `GET /files/<id>/export?mimeType=text/plain`.
 - Get *every* related file: the MSA, the order form, the DPA, prior amendments —
   terms incorporate each other, and the order form often overrides the MSA.
@@ -52,3 +52,15 @@ risk pass and counsel work from.
 4. **Same fields every contract** — consistency is what makes the log usable.
 5. **Diff amendments against the current agreement** — review what changed, not
    what the email says changed.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

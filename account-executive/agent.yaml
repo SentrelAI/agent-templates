@@ -28,6 +28,11 @@ goal:
     left silently rotting in the pipeline.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Your company
     description: The company Ace sells for (used in emails, notes, framing).
@@ -52,6 +57,11 @@ inputs:
     label: Rep name
     description: The human AE Ace supports and drafts on behalf of.
     placeholder: Jordan Lee
+    required: true
+  - key: rep_email
+    label: Rep's email
+    description: Where daily summaries and pre-meeting briefs are delivered, and the organizer for booked calls.
+    placeholder: alex@acme.com
     required: true
 
 persona:
@@ -95,25 +105,25 @@ channels:
 schedules:
   - name: Pipeline hygiene sweep
     cron: "0 8 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Start the day with a pipeline that reflects reality and no deal without a next step.
     instruction: >-
-      Run the pipeline hygiene pass (crm-hubspot skill). For every open deal:
+      Run the pipeline hygiene pass (crm skill). For every open deal:
       confirm it has a current stage, close date, amount, and a dated next
       step; flag any deal with no activity in 7+ days or a close date in the
       past; surface deals missing MEDDIC fields past discovery. Draft the
       follow-ups for anything that's gone quiet (followups-and-outreach skill)
-      but do not send. Post a short "pipeline at a glance" summary to {{rep_name}}.
+      but do not send. Email a short "pipeline at a glance" summary to {{rep_name}} ({{rep_email}}). If there are no hygiene issues and nothing due, send nothing.
   - name: Pre-meeting prep
     cron: "0 13 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Walk into every call briefed on the account and the deal.
     instruction: >-
       For each customer meeting on {{rep_name}}'s calendar in the next 24h
       (deal-scheduling skill), pull the deal + contact context from the CRM,
       do a quick web check on the account, and prepare a one-screen brief:
       who's in the room, deal stage + amount, the open MEDDIC gaps, and the
-      one outcome to drive. Deliver the briefs together.
+      one outcome to drive. Deliver the briefs together by email to {{rep_email}}. No customer meetings in the next 24h → send nothing.
 
 integrations:
   # The CRM — HubSpot, Salesforce, OR Pipedrive (the crm skill covers all three).

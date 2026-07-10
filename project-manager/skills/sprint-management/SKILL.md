@@ -18,10 +18,11 @@ request({ provider:"linear", method:"POST", path:"/graphql",
 
 ## Read the active board
 ```graphql
-query($teamId: String!) {
+query($teamId: String!, $cursor: String) {
   team(id: $teamId) {
     activeCycle {
-      issues {
+      issues(first: 100, after: $cursor) {
+        pageInfo { hasNextPage endCursor }
         nodes {
           identifier title url priority
           state { name type }            # type: backlog/unstarted/started/completed/canceled
@@ -34,7 +35,9 @@ query($teamId: String!) {
   }
 }
 ```
-(Get `teamId` once: `query { teams { nodes { id key name } } }`.) For a broader
+(Get `teamId` once: `query { teams { nodes { id key name } } }`.) Loop with
+`after: endCursor` until `hasNextPage` is false — Linear caps at 50 nodes by
+default, and a partial board read is a false status. For a broader
 view use `issues(filter:{ state:{ type:{ eq:"started" } } })`.
 
 ## Spot staleness + blockers (the daily job)
@@ -75,3 +78,23 @@ NOT `issueArchive`/delete — those are gated (reassign/rescope = ask, close/del
 3. **Nudge + follow-up only.** Never reassign, rescope, close, or delete — flag
    for the owner/lead.
 4. **Check `body.errors`** on every call.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.
+
+## PR status behind an issue (github, optional)
+
+When github is connected, resolve "in review vs not started" without asking:
+`request({ provider:"github", method:"GET", path:"/search/issues",
+  query:{ q:"is:pr ENG-421 in:title,body" } })` → for each hit, `pull_request`
++ `state`/`draft` tell you open/draft/merged. Match on the Linear identifier
+in the PR title/body (the team convention). No hits = no PR yet.

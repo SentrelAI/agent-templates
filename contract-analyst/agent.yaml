@@ -30,6 +30,16 @@ goal:
     and never signs — a lawyer and a human decide.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
+  - key: contract_log
+    label: Where the contract log lives
+    description: The Notion database (and optionally the Drive folder) where contracts are tracked. Lex resolves the database id from this once and remembers it.
+    placeholder: "'Contracts' Notion database"
+    required: false
   - key: company_name
     label: Company
     description: Whose contracts Lex analyzes.
@@ -94,7 +104,7 @@ channels:
 schedules:
   - name: Renewal & obligation watch
     cron: "0 9 * * 1"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: No contract auto-renews unseen; no notice window closes unnoticed.
     instruction: >-
       Sweep the contract log (obligations-and-renewals skill): anything entering

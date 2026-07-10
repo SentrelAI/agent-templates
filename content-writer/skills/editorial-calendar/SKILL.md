@@ -16,6 +16,16 @@ request({ provider:"notion", method, path, query?, body? })
   `{ status, body }`. The calendar is a Notion **database** (one page per piece,
   a Status property + Due date).
 
+## First run — find the calendar database
+
+`<calendarDbId>` comes from Notion search, not guesswork:
+`POST /v1/search` · `body:{ query:"<calendar name from {{content_workspace}}>",
+filter:{ property:"object", value:"database" } }` → confirm the match with
+the owner once, then save the database id to persistent memory (a durable
+fact). If search returns nothing, ask the owner to share the database with
+the integration in Notion (Connections → add) — a 404 on a known db means
+exactly that.
+
 ## See what's due / in flight
 ```
 request({ provider:"notion", method:"POST", path:"/v1/databases/<calendarDbId>/query",
@@ -57,3 +67,15 @@ request({ provider:"notion", method:"POST", path:"/v1/pages",
    the piece's page.
 4. **Nothing is due-and-forgotten** — the weekly plan surfaces what's due; start
    it early.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

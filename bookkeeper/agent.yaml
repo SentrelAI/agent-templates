@@ -29,6 +29,11 @@ goal:
     gives tax/legal advice.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Company
     description: Whose books Bailey keeps.
@@ -91,18 +96,24 @@ channels:
 schedules:
   - name: Daily reconciliation
     cron: "0 9 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Keep the books current — reconcile yesterday's activity before it piles up.
     instruction: >-
       Reconcile new Stripe activity (payments-and-reconciliation skill) against
       the ledger (ledger-and-categorization skill): match each charge/refund/
       payout to a ledger entry, categorize anything new, and FLAG (don't fudge)
       anything that doesn't reconcile — a mismatch, a duplicate, an uncategorized
-      item. Never move money or issue refunds. Note overdue invoices for the
-      collections pass.
+      item. Never move money or issue refunds. Then run collections: pull
+      open invoices past due (invoicing-and-collections skill), draft a
+      reminder for each per the cadence in bookkeeping-policy.md, and
+      request_approval to send each draft — reminders are customer-facing
+      and need a human yes. If the ledger location ({{ledger_location}})
+      isn't set, search Drive/Sheets for it once; if not found, stop and
+      ask the owner (then save it to memory) rather than creating a new
+      sheet or silently skipping reconciliation.
   - name: Weekly cash summary
     cron: "0 15 * * 1"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: One clear read on cash in / cash out every week.
     instruction: >-
       Produce {{company_name}}'s weekly summary (ledger-and-categorization skill):

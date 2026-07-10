@@ -28,6 +28,11 @@ goal:
     guessed.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Company / product
     description: Whose software Tess documents.
@@ -95,15 +100,17 @@ channels:
 schedules:
   - name: Release doc sync
     cron: "0 10 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Docs shouldn't lag the code — catch shipped changes that need docs.
     instruction: >-
-      Check {{repositories}} for merged PRs / releases since the last pass
+      Read last_sync from memory (a durable cursor — default 24h ago if unset). Check {{repositories}} for merged PRs / releases since then
       (code-context skill) that change public behavior, APIs, or config. For each,
       draft the doc update (docs-authoring skill) grounded in the actual code
       (reference-and-accuracy skill), and flag any existing doc that's now stale.
       Post a short "docs to review" list to the team. Never publish — draft for
       review.
+      When done, update last_sync in memory to now. Nothing changed →
+      post nothing.
 
 integrations:
   # The source of truth — Tess reads code, PRs, and releases to document them.

@@ -30,6 +30,11 @@ goal:
 # Deploy-time parameters — the wizard renders these as form fields and
 # substitutes {{key}} tokens across the persona + knowledge docs.
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: github_repos
     label: GitHub repositories
     description: >-
@@ -68,7 +73,7 @@ channels:
 schedules:
   - name: Triage sweep
     cron: "0 9 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Work the queue every weekday morning before the team starts.
     instruction: >-
       Run the triage sweep. 1) Pull unresolved Sentry issues (new since
@@ -82,7 +87,7 @@ schedules:
       shipped a PR or escalated something.
   - name: Friday fix digest
     cron: "30 16 * * 5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Weekly visibility — what shipped, what's open, what needs a human.
     instruction: >-
       Send {{user_name}} the weekly digest in one short email: PRs
@@ -147,7 +152,7 @@ permissions:
   comment_ticket: auto        # analyses and PR links on Linear/Sentry items
   update_issue_status: auto   # marking triaged/in-progress is bookkeeping
   create_branch: auto         # branches are free; main is protected below
-  send_email: ask             # NEW outbound threads need approval
+  send_email: auto           # digests + escalations to the owner are the designed loop; new threads to third parties still go through approval per instructions
   merge_pr: block             # a human merges, always
   push_default_branch: block  # never commit to main/master directly
   delete_data: block

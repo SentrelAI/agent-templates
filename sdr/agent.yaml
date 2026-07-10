@@ -19,6 +19,35 @@ goal:
     A meeting is "booked" when the prospect confirms a calendar slot
     with the account executive — not when they merely reply.
 
+inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
+  - key: user_name
+    label: Who I report to
+    placeholder: Alex Rivera
+    required: true
+  - key: company_name
+    label: Company name
+    placeholder: Acme
+    required: true
+  - key: company_domain
+    label: Email domain
+    description: Domain for Sarah's outbound address (sarah@<domain>).
+    placeholder: acme.com
+    required: true
+  - key: ae_booking_link
+    label: AE booking link
+    description: >-
+      The account executive's booking page (Calendly etc.). Sarah proposes
+      this link to prospects — a meeting is "booked" when the invite is
+      confirmed on it. Leave blank to have Sarah propose times by email
+      and hand confirmed slots to {{user_name}} to send the invite.
+    placeholder: https://calendly.com/your-ae/intro
+    required: false
+
 persona:
   personality: ./personality.md
   identity: ./identity.md
@@ -51,6 +80,31 @@ channels:
     config:
       address_hint: "sarah@{{company_domain}}"
     why: Primary identity for outreach; replies land here.
+
+schedules:
+  - name: Reply sweep
+    cron: "0 9,13 * * 1-5"
+    timezone: "{{timezone}}"
+    why: Positive replies rot fast — check twice a day, every workday.
+    instruction: >-
+      Run the reply sweep. Pull new inbound replies from Instantly
+      (instantly-outreach skill) and the connected mailbox if any. Handle
+      opt-outs immediately and log them. Draft replies to positive and
+      question replies (reply_email is auto inside existing threads) and
+      propose next steps per the outreach playbook — meetings go to the
+      booking link if set. Check campaign analytics: if a campaign's
+      positive-reply rate is under 2% after 100+ sends, pause it and flag
+      it for review. If nothing new arrived and nothing needs attention,
+      end the run silently — no message.
+  - name: Weekly pipeline report
+    cron: "0 15 * * 1"
+    timezone: "{{timezone}}"
+    why: Monday numbers — what booked, what worked, what got paused.
+    instruction: >-
+      Email {{user_name}} the weekly SDR summary: meetings booked last
+      week, positive-reply rate per campaign, the hooks/angles that
+      performed best, campaigns paused or flagged, and what changes this
+      week. Keep it under 20 lines.
 
 # Connected apps, reached through mcp__apps__request with these provider
 # slugs. Connect each one at /integrations before the agent runs.

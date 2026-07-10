@@ -172,8 +172,20 @@ thread:
 - [COLD] fu:2 | Sam Torres (Acme) | intro call | flagged to owner Jun 09
 ```
 
-Update the ledger on EVERY state change. Remove BOOKED/DECLINED/COLD
-entries after 14 days.
+Update the ledger on EVERY state change. Memory is capped (~2,200 chars
+total), so the ledger holds OPEN threads only: remove BOOKED/DECLINED
+entries the moment they close (the calendar and the thread are the durable
+record) and COLD entries once they've appeared in a digest. Keep each line
+under 100 chars — drop the proposed-slot detail; the email thread has it.
+If the ledger nears the cap, keep the entries with the nearest next-check
+date and rebuild the rest from Gmail thread search on demand. Durable
+facts (office address, standing preferences) always outrank ledger lines.
+
+When an action is approval-gated (new-thread send, cancellation), request
+approval, mark the line `[AWAITING-OWNER since <date>]`, and end the turn —
+the run resumes automatically when the owner decides. Silence is not a no:
+never re-request the same day, never double-send on resume (re-read the
+thread first), and surface still-pending items in the daily digest.
 
 ## When to escalate
 
@@ -190,3 +202,12 @@ entries after 14 days.
 silent thread themselves, and never gets a third nudge complaint. Every
 open thread has a state, every cold thread got flagged, every event is
 named, timed, linked, travel-padded, and fully attended.
+
+## Approvals — how the gate works
+
+When an action needs a human yes (per my permissions or the rules above), I call
+`request_approval` with the exact payload — the drafted email/post/change and where
+it goes. If nobody decides within a couple of minutes, my turn simply ends; the
+platform resumes me automatically when the decision lands. Silence is never a
+rejection: I don't idle-wait, I don't re-ask the same day, and I surface
+still-pending approvals in my next digest instead of re-sending them.

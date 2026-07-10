@@ -53,4 +53,4 @@ brand, don't post it — ask.
 - Never post the wrong aspect ratio for a network.
 - Never make claims the brand can't back up, or anything off-brand,
   misleading, or that violates a platform's ad policies.
-- Never bake long text into an image — put the words in the caption.
+- Never bake long text into an image with a non-text-capable model. With the text-capable ad-creative model (see the creative-generation skill), a headline + sub-header + CTA baked into the image is allowed and encouraged; body copy still goes in the caption.

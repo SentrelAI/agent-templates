@@ -24,7 +24,15 @@ mcp__apps__request({ provider, method, path, query?, body? })
 - `path` is relative to that app's API base; Rails injects the auth
   token for you. NEVER ask for, include, or echo a token.
 - The result is `{ status, body }` — branch on `status`, read `body`.
-- Don't use `git` or the `gh` CLI — they aren't authenticated here.
+- `git`/`gh` have no credentials here. Public repo → you can still clone
+  anonymously into your workspace to run tests. Private repo → fetch the
+  files you need via the API (contents endpoints) into your workspace.
+- **Verify before you ship**: reproduce the failure from the stack trace
+  (write a failing test where the suite supports it), apply the fix, and
+  run the affected tests if the repo is runnable in your workspace. If you
+  can't execute the code, say so — the PR body must carry a **Verification**
+  section stating exactly what you ran or why you couldn't. Never imply a
+  fix was executed when it wasn't.
   Every code action goes through `request(...)`.
 
 API bases per provider:
@@ -33,7 +41,7 @@ API bases per provider:
 |----------|------|-------|
 | `github` | `https://api.github.com` | REST. Paths start with `/`. See the GitHub skill for the full surface. |
 | `linear` | `https://api.linear.app` | GraphQL only — POST `/graphql` with `{ query, variables }`. |
-| `sentry` | `https://sentry.io` | REST. Paths start with `/api/0/...`. |
+| `sentry` | `https://sentry.io/api/0` | REST. The base already includes `/api/0` — paths start at `/organizations/...`. |
 
 ## GitHub calls you need (mirror the GitHub skill)
 
@@ -80,14 +88,14 @@ body:{ query:"mutation($id:String!,$stateId:String!){ issueUpdate(id:$id, input:
 > `body.errors` before trusting `body.data`. State ids are workspace-
 > specific; resolve them once via `team.states.nodes` and reuse.
 
-## Sentry calls (REST — /api/0/...)
+## Sentry calls (REST — base already includes /api/0)
 
 | Step | Call |
 |------|------|
-| Read an issue | `GET /api/0/organizations/{org}/issues/{issue_id}/` |
-| Read latest event (stack trace) | `GET /api/0/organizations/{org}/issues/{issue_id}/events/latest/` |
-| List events for an issue | `GET /api/0/organizations/{org}/issues/{issue_id}/events/` |
-| Mark addressed / resolved | `PUT /api/0/organizations/{org}/issues/{issue_id}/` · `body:{ status:"resolved" }` |
+| Read an issue | `GET /organizations/{org}/issues/{issue_id}/` |
+| Read latest event (stack trace) | `GET /organizations/{org}/issues/{issue_id}/events/latest/` |
+| List events for an issue | `GET /organizations/{org}/issues/{issue_id}/events/` |
+| Mark addressed / resolved | `PUT /organizations/{org}/issues/{issue_id}/` · `body:{ status:"resolved" }` |
 
 > Sentry paths keep their trailing slash. To flag work in progress
 > instead of resolving, use `status:"ignored"` or assign the issue; only
@@ -145,3 +153,13 @@ thread with `POST /repos/{owner}/{repo}/issues/{pr_number}/comments`
   reconnect that app at /integrations; don't retry.
 - Two failed attempts at ANY step → stop, write what you tried on the
   ticket, escalate. Never thrash against the API.
+
+## Intake (the triage sweep's list calls)
+
+- Org slug once: `GET /organizations/` → cache the slug in memory.
+- Unresolved Sentry issues: `GET /organizations/{org}/issues/` ·
+  `query:{ query:"is:unresolved", statsPeriod:"24h", sort:"freq", limit:25 }`
+- Comment on a Sentry issue: `POST /issues/{issue_id}/notes/` · `body:{ text }`
+- Linear bugs (GraphQL POST /graphql):
+  `query($f:IssueFilter){ issues(filter:$f){ nodes{ id identifier title url } } }`
+  · `variables:{ f:{ labels:{ name:{ eq:"bug" } }, assignee:{ null:true } } }`

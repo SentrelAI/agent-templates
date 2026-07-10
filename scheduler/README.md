@@ -1,4 +1,4 @@
-# Scheduler example bundle — "Rio"
+# Rio — Scheduler
 
 An executive-grade scheduling assistant as an Agent Bundle. The
 interesting part isn't the booking — it's the **lifecycle**: every
@@ -48,7 +48,7 @@ the owner and goes quiet. The cap is an invariant, not a suggestion.
 | Reschedule / cancel / decline / OOO / revival | instructions + skill edge cases |
 | Day-before RSVP confirmation | instructions |
 | Auditable state | the memory ledger format |
-| Standing cron jobs from day one | `schedules:` in agent.yaml — morning sweep (weekdays 8:30) + Friday pipeline digest |
+| Standing cron jobs from day one | `schedules:` in agent.yaml — morning sweep + daily 17:00 digest |
 
 ## Safety posture
 
@@ -60,12 +60,12 @@ the owner and goes quiet. The cap is an invariant, not a suggestion.
 ## Deploy it
 
 ```sh
-npx @manifestagent/agentmanifest deploy examples/scheduler
+Deploy Rio from the Templates page.
 ```
 
 This validates the bundle, uploads it, and opens the sentrel deploy
 wizard in your browser. Or from a workspace:
-`/deploy-agent?source=<this repo URL>/tree/main/agent-manifest/examples/scheduler`
+the Templates page
 
 After deploy: connect Google Calendar + Gmail (the wizard offers both —
 the `google_calendar` and `gmail` connections), fill the office
@@ -76,5 +76,5 @@ exactly 3 slots and a follow-up check on the books.
 Rio reaches every connected app through one tool, `request` (server
 `apps`): `request({ provider, method, path, query?, body? })`. The
 platform injects auth and returns `{ status, body }` — no SDKs and no
-credentials live in the bundle. The bundled `calendar-booking` and
+credentials live in the bundle. The platform-installed `calendar-booking` and
 `gmail-management` skills carry the exact request shapes.

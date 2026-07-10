@@ -15,8 +15,12 @@ request({ provider:"notion", method, path, query?, body? })
 - **Find an existing doc:** `POST /v1/search { query, filter:{ property:"object", value:"page" } }`.
 - **Read it** (to update): `GET /v1/blocks/<pageId>/children`.
 - **New doc:** `POST /v1/pages { parent:{ database_id }, properties, children:[...] }`.
-- **Update:** append/replace blocks via `PATCH /v1/blocks/<pageId>/children`;
-  update a single block via `PATCH /v1/blocks/<blockId>`. Use a `code` block for
+- **Update in place:** `PATCH /v1/blocks/<pageId>/children` only *appends* —
+  used alone it stacks the corrected section under the stale one, the exact
+  doc-that-lies this role exists to prevent. To replace a stale section:
+  `GET /v1/blocks/<pageId>/children` (paginate via `next_cursor`), `DELETE
+  /v1/blocks/<blockId>` for each stale block, then append the corrected
+  blocks (≤100 per call). For one block's text: `PATCH /v1/blocks/<blockId>`. Use a `code` block for
   examples:
   ```
   { object:"block", type:"code", code:{ language:"bash",
@@ -24,7 +28,7 @@ request({ provider:"notion", method, path, query?, body? })
   ```
 
 ## Google Docs — long-form guides/tutorials
-For a full guide/tutorial, a document may fit better (see the drafting pattern):
+For a full guide/tutorial, a document may fit better:
 create `POST /documents { title }`, insert the whole text in one batchUpdate at
 index 1, then style headings — base `https://docs.googleapis.com/v1`, relative
 paths, mind the character-index gotcha (insert first, style second).
@@ -44,3 +48,15 @@ paths, mind the character-index gotcha (insert first, style second).
 3. **Update in place** — when a doc exists, edit it to match the code; don't
    leave a stale copy beside a new one.
 4. **Predictable structure** — same shape every time so devs find answers fast.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

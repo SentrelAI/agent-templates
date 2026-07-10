@@ -15,10 +15,14 @@ request({ provider:"github", method, path, query?, body? })
 - **Base `https://api.github.com`.** Auth injected. Repos come from
   {{repositories}} as `owner/name`. Result `{ status, body }`.
 
+Resolve `<default_branch>` once per repo: `GET /repos/<o>/<r>` →
+`body.default_branch` — never hardcode `main`; on a `master` repo every
+"what merged" query silently returns nothing.
+
 ## Read the actual source (verify, don't guess)
 ```
 request({ provider:"github", method:"GET",
-  path:"/repos/<owner>/<name>/contents/<path>", query:{ ref:"main" } })
+  path:"/repos/<owner>/<name>/contents/<path>", query:{ ref:"<default_branch>" } })
 // → body.content is base64-encoded; decode to read. This is the ground truth
 //   for signatures, params, defaults, return shapes, error paths.
 ```
@@ -35,7 +39,7 @@ request({ provider:"github", method:"GET", path:"/search/code",
 ## Catch shipped changes (the sync job)
 ```
 request({ provider:"github", method:"GET", path:"/repos/<owner>/<name>/pulls",
-  query:{ state:"closed", base:"main", sort:"updated", direction:"desc", per_page:30 } })
+  query:{ state:"closed", base:"<default_branch>", sort:"updated", direction:"desc", per_page:30 } })
 // merged PRs: body[].merged_at is set. Read the PR + its /files (patch) to see
 // what public behavior/API/config changed → what docs need updating.
 request({ provider:"github", method:"GET", path:"/repos/<owner>/<name>/releases",
@@ -52,3 +56,15 @@ request({ provider:"github", method:"GET", path:"/repos/<owner>/<name>/releases"
    are now stale.
 4. **Match the branch/version** you're documenting (usually `main`/latest release)
    — don't document code that isn't shipped.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

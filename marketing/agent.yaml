@@ -28,6 +28,11 @@ goal:
     without explicit approval.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: brand_name
     label: Brand name
     description: The brand Nova markets for (used across captions, ad copy, reports).
@@ -88,19 +93,21 @@ channels:
 schedules:
   - name: Content calendar
     cron: "0 9 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Plan and tee up the day's posts before the team is online.
     instruction: >-
-      Run the daily content pass for {{brand_name}}. 1) Review the content
-      calendar and any briefs in the inbox. 2) For each slot due today,
+      Run the daily content pass for {{brand_name}}. 1) Check the inbox
+      for new briefs and read workspace/ledger.md for approved-but-
+      unpublished items and anything due today. 2) For each item due,
       generate the creative per the creative-generation skill in the right
       format for its network. 3) Draft the caption/copy in the brand voice
       ({{brand_handles}}) and submit the post for approval per the
-      social-publishing skill — never auto-publish. Report a one-line
-      summary of what's queued.
+      social-publishing skill — never auto-publish. 4) Update the ledger.
+      If there are no briefs and nothing due, end the run silently — no
+      summary email.
   - name: Weekly performance report
     cron: "0 15 * * 1"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Monday reporting — what shipped, what performed, what to do next.
     instruction: >-
       Send {{brand_name}}'s weekly marketing report in one email: posts
@@ -153,7 +160,7 @@ secrets:
 # Email marketing needs no connection: Nova sends from its own built-in outbox
 # address (the native send-email mechanism). Connect an ESP (Mailchimp/SendGrid)
 # at /integrations only for true bulk newsletters with list management +
-# unsubscribe, or Gmail (`google-mail`) to send from a specific mailbox. See the
+# unsubscribe, or Gmail (`gmail`) to send from a specific mailbox. See the
 # email-newsletters skill.
 
 permissions:

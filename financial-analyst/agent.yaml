@@ -28,6 +28,11 @@ goal:
     changes source data, or gives tax/legal advice.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Company
     description: Whose finances Finn analyzes.
@@ -44,6 +49,14 @@ inputs:
     label: Where the model lives
     description: The Google Sheet with the financial model / forecast Finn maintains.
     placeholder: "'FP&A Model' Google Sheet"
+    required: false
+  - key: ledger_location
+    label: Where the actuals live
+    description: >-
+      The ledger of spend/cash actuals — if Bailey the bookkeeper runs your
+      books, this is Bailey's ledger sheet. Finn reads actuals from here;
+      without it he'll ask once and remember the answer.
+    placeholder: "'2026 Ledger' Google Sheet"
     required: false
   - key: fiscal_setup
     label: Fiscal basics
@@ -95,7 +108,7 @@ channels:
 schedules:
   - name: Weekly metrics + variance
     cron: "0 14 * * 1"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: A forward-looking read on the business every Monday, not a rear-view mirror.
     instruction: >-
       Refresh {{key_metrics}} from actuals (metrics-and-forecasting skill), update

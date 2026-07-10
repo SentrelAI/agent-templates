@@ -59,7 +59,7 @@ request({ provider:"google_calendar", method:"POST", path:"/calendars/primary/ev
          description:"<agenda + deal context>",
          start:{ dateTime:"<RFC3339>", timeZone:"<tz>" },
          end:{ dateTime:"<RFC3339>", timeZone:"<tz>" },
-         attendees:[{ email:"prospect@x.com" }, { email:"<rep email>" }],
+         attendees:[{ email:"prospect@x.com" }, { email:"{{rep_email}}" }],
          conferenceData:{ createRequest:{ requestId:"<uuid>" } } } })
 ```
 
@@ -92,3 +92,15 @@ Same flow, Graph endpoints:
 3. **Timezones explicit**, `singleEvents:true` on reads, `sendUpdates:"all"`
    only when you actually book/move (post-approval).
 4. **Tie every meeting to its deal** so the prep brief + CRM note have context.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

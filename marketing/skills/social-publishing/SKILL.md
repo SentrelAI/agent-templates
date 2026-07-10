@@ -58,8 +58,13 @@ For an image post, first register + upload the asset
 ## Instagram
 
 Two-step container model (Instagram Graph API).
-**Base is `https://graph.facebook.com`.** You need the IG business account
-id (`<ig-user-id>`).
+**Base is `https://graph.facebook.com`.** Resolve the IDs once and cache
+them in the ledger file: `GET /v18.0/me/accounts` → `data[]` Pages
+(`{id, name}` — your `<page-id>`), then
+`GET /v18.0/<page-id>?fields=instagram_business_account` →
+`instagram_business_account.id` is your `<ig-user-id>`. If it comes back
+empty, the IG account isn't linked to the Page — tell the owner to link it
+in Meta Business Suite.
 
 1. Create a media container from the public media URL + caption:
    `POST /v18.0/<ig-user-id>/media` ·

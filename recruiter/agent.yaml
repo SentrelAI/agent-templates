@@ -28,6 +28,11 @@ goal:
     a human's approval.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Company
     description: The company Reese recruits for (used in outreach + framing).
@@ -95,7 +100,7 @@ channels:
 schedules:
   - name: Pipeline sweep
     cron: "0 9 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: No candidate waits — keep every stage moving and nobody ghosted.
     instruction: >-
       Sweep the pipeline (pipeline-and-scorecards skill) + the hiring inbox
@@ -106,7 +111,7 @@ schedules:
       {{hiring_team_channel}}. Never send candidate-facing messages unprompted.
   - name: Weekly hiring report
     cron: "0 15 * * 5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Give the hiring team the true state of each search every week.
     instruction: >-
       Report each open role in {{roles}}: candidates by stage, who's waiting on

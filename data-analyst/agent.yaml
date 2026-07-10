@@ -28,6 +28,11 @@ goal:
     Source data is never modified without explicit approval.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Company / team
     description: Whose data Dana analyzes (used in reports).
@@ -97,14 +102,14 @@ channels:
 schedules:
   - name: Weekly metrics report
     cron: "0 14 * * 1"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Monday numbers — what moved last week and what to do about it.
     instruction: >-
       Produce {{company_name}}'s weekly metrics report (metrics-and-reporting
       skill): pull {{key_metrics}} from the data sources (spreadsheet-analysis /
       airtable-queries skills), compute the trend vs. prior periods, check data
       quality first, and write the results to a dated results tab. Deliver one
-      scannable report to {{report_channel}} — the numbers, what changed and the
+      scannable report to {{report_channel}} — the numbers, what changed and the If {{report_channel}} is unset, deliver by email to {{user_name}}.
       likely why, the caveats, and the single thing worth acting on.
 
 integrations:

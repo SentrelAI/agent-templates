@@ -26,6 +26,11 @@ goal:
     review." Nothing publishes or sends without a human's approval.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: company_name
     label: Company / brand
     description: Who Cleo writes for.
@@ -95,7 +100,7 @@ channels:
 schedules:
   - name: Editorial calendar planning
     cron: "0 9 * * 1"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Start the week knowing what's being written and what's due.
     instruction: >-
       Review the editorial calendar (editorial-calendar skill): what's due this

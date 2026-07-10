@@ -62,5 +62,5 @@ slack.post({ text: "📥 Queue: 4 open · 3 drafted (awaiting approval) · 1 esc
    thread link. No context = no fast handoff.
 4. **Reserve urgency.** `🚨`/`<!here>` are for genuine outages/security/very-upset
    customers — overusing them trains the team to ignore them.
-5. **One summary, not a play-by-play.** Post the queue summary once per sweep,
+5. **One summary, not a play-by-play.** Post the queue summary once per sweep *that had activity* — a sweep with nothing new posts nothing,
    not a message per ticket.

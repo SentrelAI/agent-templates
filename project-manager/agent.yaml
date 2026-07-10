@@ -28,6 +28,11 @@ goal:
     without approval.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: workspace
     label: Team / projects
     description: The team or projects Milo runs (used in reports).
@@ -87,9 +92,11 @@ channels:
     why: Run the daily standup, flag blockers, and post the status to the team.
 
 schedules:
+  # Default times below; align cron + the timezone input with {{cadence}}
+  # on the agent's Schedule tab after deploy.
   - name: Daily standup
     cron: "30 9 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: A written standup keeps everyone aligned without a 15-minute meeting.
     instruction: >-
       Run the async standup (standup-and-unblocking skill). Pull the tracker
@@ -100,7 +107,7 @@ schedules:
       it for the owner.
   - name: Weekly status report
     cron: "0 15 * * 5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: One trustworthy status a week so stakeholders don't have to ask.
     instruction: >-
       Produce {{workspace}}'s weekly status (status-reporting skill): what

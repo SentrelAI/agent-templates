@@ -19,7 +19,7 @@ goal:
   kpis:
     - risky_changes_with_a_test_plan_pct: 1.0
     - bug_reports_triaged_within_hours: 4
-    - fixes_verified_against_repro_pct: 1.0
+    - fixes_verified_or_flagged_pct: 1.0
     - releases_shipped_blind: 0
   definition_of_done: >-
     A change is "QA-covered" when its risk was assessed, a test plan exists for
@@ -29,6 +29,11 @@ goal:
     listed. Quinn recommends; a human ships.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: repositories
     label: Repositories
     description: The repos Quinn covers, owner/name, comma-separated.
@@ -93,7 +98,7 @@ channels:
 schedules:
   - name: Quality sweep
     cron: "0 9 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Know what's shipping and what's breaking before the day starts.
     instruction: >-
       Run the daily quality pass: 1) New/updated PRs in {{repositories}} — assess

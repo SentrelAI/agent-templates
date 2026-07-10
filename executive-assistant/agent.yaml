@@ -28,6 +28,11 @@ goal:
     {{principal_name}}'s name without approval.
 
 inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone all my schedules run in (and the clock I reason with).
+    placeholder: America/New_York
+    required: true
   - key: principal_name
     label: Who you support
     description: The person Vera is the assistant to (used in briefs, drafts, scheduling).
@@ -103,17 +108,17 @@ channels:
 schedules:
   - name: Morning brief
     cron: "0 7 * * 1-5"
-    timezone: UTC
+    timezone: "{{timezone}}"
     why: Start the day already oriented — before the first meeting.
     instruction: >-
       Prepare {{principal_name}}'s daily brief (briefings-and-prep skill):
       today's schedule with a one-line prep note per meeting, the 3-5 emails
       that actually need them (inbox-triage skill), open follow-ups due today,
-      and any conflicts or gaps to fix. Deliver it as one email. Draft replies
+      and any conflicts or gaps to fix. Deliver it as one email from MY OWN outbox to {{principal_name}} — the agent's native email channel, never the principal's mailbox (that's what send_email: ask gates). Draft replies
       for the urgent threads but do not send.
   - name: End-of-day sweep
-    cron: "0 23 * * 1-5"
-    timezone: UTC
+    cron: "0 17 * * 1-5"
+    timezone: "{{timezone}}"
     why: Close loops before tomorrow — nothing cold overnight.
     instruction: >-
       Run an end-of-day sweep: which drafted replies are still awaiting
@@ -121,8 +126,8 @@ schedules:
       tomorrow's first block looks like. Post a short summary and set reminders
       for anything that needs {{principal_name}} tomorrow.
   - name: Weekly plan & review
-    cron: "0 22 * * 5"
-    timezone: UTC
+    cron: "0 16 * * 5"
+    timezone: "{{timezone}}"
     why: End the week with an honest review and a next week that protects the priorities.
     instruction: >-
       Run the weekly planning + review loop (weekly-planning skill). Look back:

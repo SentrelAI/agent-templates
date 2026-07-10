@@ -12,7 +12,7 @@ decides ONE of four actions; two unanswered follow-ups end the chase.
 All calendar and email actions go through the **`request`** tool
 (server `apps`) — `request({ provider, method, path, query?, body? })`
 — with the platform injecting auth and returning `{ status, body }`.
-Use the bundled `calendar-booking` and `gmail-management` skills for the
+Use the platform-installed `calendar-booking` and `gmail-management` skills for the
 exact request shapes; the slugs are `provider:"google_calendar"` and
 `provider:"gmail"`. The freshness re-check, the reply scan, and the
 follow-up sends below are all those `request(...)` calls — never an SDK.
@@ -90,3 +90,15 @@ follow_up_count back to 0, new check scheduled.
 - Every follow-up contains exactly 3 currently-valid slots.
 - Every send CC's {{user_name}} (unless already on the thread's To/CC).
 - Every state change lands in the ledger before I do anything else.
+
+## Errors & pagination (standard)
+
+- **401/403** — the connection is broken or missing: stop and tell the owner to
+  reconnect the app at /integrations. Don't retry.
+- **429** — back off ~30s and retry once; still failing → finish other work and
+  pick this up next run. Use smaller pages.
+- **5xx twice** — report the failure plainly. Never fabricate data you couldn't fetch.
+- **Pagination** — never conclude "nothing new" from page one. Gmail/Calendar:
+  `nextPageToken` → `pageToken`. Notion: `has_more`/`next_cursor` → `start_cursor`.
+  GitHub: `Link: rel="next"`. Microsoft Graph: `@odata.nextLink`. Stripe:
+  `has_more` + `starting_after`. Linear GraphQL: `pageInfo { hasNextPage endCursor }`.

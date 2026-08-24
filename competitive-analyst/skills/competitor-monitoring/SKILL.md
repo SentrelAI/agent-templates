@@ -22,11 +22,11 @@ answer fast and non-repetitive.
    against the profile's pricing snapshot; any change is at least 🟡.
 4. **Content & positioning:** `site:<domain>/blog` for the week's posts;
    note only what reveals strategy (new segment, new claim, new comparison
-   page — especially comparison pages naming {{company_name}}).
+   page — especially comparison pages naming our company).
 5. **People & hiring:** search `"<Competitor>" hires OR joins OR appointed`
    and skim their careers page. A cluster of hires in one function is a
    roadmap leak (three ML hires = they're building the thing).
-6. **Market terms:** one pass over {{market_keywords}} for category-level
+6. **Market terms:** one pass over the market watch terms (in my identity) for category-level
    moves — new entrants, regulation, platform shifts.
 
 ## Delta discipline

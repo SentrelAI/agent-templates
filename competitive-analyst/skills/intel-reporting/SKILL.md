@@ -12,7 +12,7 @@ optimized for a founder skimming between meetings.
 
 | What | Where | When |
 |---|---|---|
-| 🔴 Red alert | Email {{user_name}} immediately + chat | Within the sweep that confirmed it |
+| 🔴 Red alert | Email the owner immediately + chat | Within the sweep that confirmed it |
 | 🟡 Daily deltas | Chat digest (the sweep's reply) | Only when something's new |
 | Weekly report | Email + chat summary line | Every Friday, no exceptions |
 | Deep-dive answers | Chat; email too if asked or red | On delivery |
@@ -38,7 +38,7 @@ Subject: `Intel week of <date>: <the one-line headline of the week>`
 
 1. **The week in one paragraph** — what actually mattered.
 2. **Competitor moves** — per competitor with deltas only: fact → source →
-   what it means for {{company_name}}.
+   what it means for our company.
 3. **Market & funding** — category-level shifts, rounds, entrants.
 4. **Prospects surfaced** — the week's rows from prospect-mining, ready for
    handoff.
@@ -67,7 +67,14 @@ whenever that competitor moves; note the refresh in the weekly report.
 
 ## Filing (when Notion is connected)
 
-Weekly reports and battlecards also file into the intel base — find the
-database via `POST /v1/search`, confirm with the owner once, remember the id
-(a durable fact). Chat/email remain the delivery path; Notion is the
-archive, never the only copy.
+Weekly reports and battlecards also file into the intel base via the apps
+proxy — find the database once with
+`request({ provider:"notion", method:"POST", path:"/v1/search",
+body:{ query:"<intel base name>", filter:{ property:"object", value:"database" } } })`,
+confirm the match with the owner, and remember the database id (a durable
+fact). Pages append via `POST /v1/pages`. Chat/email remain the delivery
+path; Notion is the archive, never the only copy.
+
+**Errors:** 401/403 → the connection is broken; tell the owner to reconnect
+Notion at /integrations, don't retry. 429 → back off and retry once. Filing
+failures never block the email — the report ships regardless.

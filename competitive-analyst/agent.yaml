@@ -49,7 +49,7 @@ inputs:
       One or two sentences on your product and buyer — this is my relevance
       filter. Everything I report is judged against "does this matter to a
       company selling THIS to THESE people."
-    placeholder: "AI note-taking for veterinary clinics, sold to practice owners"
+    placeholder: "Payroll software for restaurants, sold to franchise owners"
     required: true
   - key: competitors
     label: Competitors to track
@@ -64,7 +64,7 @@ inputs:
     description: >-
       Optional extra search terms for market-level monitoring beyond named
       competitors — category phrases, regulations, technologies.
-    placeholder: "AI scribes, ambient documentation, HIPAA AI"
+    placeholder: "restaurant tech, tip compliance, POS integrations"
     required: false
 
 persona:
@@ -115,7 +115,9 @@ schedules:
     timezone: "{{timezone}}"
     why: The Friday landscape read — everything that moved, what it means, who to call.
     instruction: >-
-      Compile and email {{user_name}} the weekly intelligence report
+      First run the prospect-mining sweep (prospect-mining skill) to refresh
+      the prospect list. Then compile and email {{user_name}} the weekly
+      intelligence report
       (intel-reporting skill): the week's competitor moves with sources and
       what each means for {{company_name}}; funding and market shifts;
       content/positioning changes worth knowing; the week's mined prospects

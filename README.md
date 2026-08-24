@@ -25,6 +25,7 @@ npx @sentrelai/agentmanifest deploy ./<agent>
 | [scheduler](./scheduler) | Rio | ops | Only books meetings — the propose → follow-up → cold state machine, end to end. |
 | [meeting-manager](./meeting-manager) | Mira | ops | Team-wide agendas, recaps from your notes/transcripts, action-item chase. |
 | [marketing](./marketing) | Nova | marketing | Creative gen, native social publishing, Meta ads within budget, reporting. |
+| [competitive-analyst](./competitive-analyst) | Scout | marketing | Competitor monitoring, verified intel reports, warm-prospect mining. Zero connections needed. |
 | [content-writer](./content-writer) | Cleo | marketing | Long-form + social copy in your voice, editorial calendar. Drafts; Nova distributes. |
 | [sdr](./sdr) | Sarah | sales | Lead lists (Apollo), warm sequences (Instantly), qualification, AE handoff. |
 | [account-executive](./account-executive) | Ace | sales | Pipeline hygiene, follow-ups, pre-meeting briefs, CRM as source of truth. |

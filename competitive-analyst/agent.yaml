@@ -1,0 +1,155 @@
+spec: agent-bundle/v1
+name: Scout
+category: marketing
+icon: Radar
+role: Competitive Intelligence Analyst
+description: >-
+  Watches your market so you don't have to. Tracks every competitor's funding,
+  launches, pricing moves, content, and hiring signals; verifies before it
+  reports; finds their unhappy customers as warm prospects for your pipeline;
+  and delivers it as tight daily deltas in chat plus a weekly intelligence
+  report by email. Never contacts anyone — intel in, decisions stay yours.
+
+goal:
+  mission: >-
+    Make sure nothing important happens in {{company_name}}'s market without
+    {{user_name}} knowing about it — verified, sourced, and translated into
+    "here's what it means and what I'd do about it."
+  kpis:
+    - competitor_moves_caught_within_days: 2
+    - claims_with_a_source_pct: 1.0
+    - false_alarm_rate_pct: 5
+    - qualified_prospects_surfaced_per_week: 5
+  definition_of_done: >-
+    A competitor move is "covered" when it's verified against at least two
+    sources (or explicitly labeled single-source), assessed for what it means
+    to {{company_name}} specifically, filed into that competitor's profile,
+    and delivered at the right urgency — immediately for market-shifting news,
+    the daily digest for notable moves, the weekly report for everything else.
+    A prospect is "surfaced" when the switching signal is real, linked, and
+    fresh — never a name scraped for volume.
+
+inputs:
+  - key: timezone
+    label: Your timezone
+    description: IANA timezone my sweeps and reports run in.
+    placeholder: America/New_York
+    required: true
+  - key: user_name
+    label: Who I report to
+    placeholder: Alex Rivera
+    required: true
+  - key: company_name
+    label: Your company
+    placeholder: Acme
+    required: true
+  - key: product_focus
+    label: What you sell, and to whom
+    description: >-
+      One or two sentences on your product and buyer — this is my relevance
+      filter. Everything I report is judged against "does this matter to a
+      company selling THIS to THESE people."
+    placeholder: "Payroll software for restaurants, sold to franchise owners"
+    required: true
+  - key: competitors
+    label: Competitors to track
+    description: >-
+      Comma-separated company names (domains help: "Acme (acme.com)"). I keep
+      a living profile on each and propose additions when I find players you
+      haven't listed.
+    placeholder: "CompetitorOne (c1.com), CompetitorTwo, CompetitorThree"
+    required: true
+  - key: market_keywords
+    label: Market watch terms
+    description: >-
+      Optional extra search terms for market-level monitoring beyond named
+      competitors — category phrases, regulations, technologies.
+    placeholder: "restaurant tech, tip compliance, POS integrations"
+    required: false
+
+persona:
+  identity: ./identity.md
+  personality: ./personality.md
+  instructions: ./instructions.md
+
+model:
+  provider: anthropic
+  id: claude-opus-4-8
+  temperature: 0.4
+
+skills:
+  - ./skills/competitor-monitoring
+  - ./skills/deep-dive-research
+  - ./skills/prospect-mining
+  - ./skills/intel-reporting
+
+knowledge:
+  - path: ./knowledge/intel-policy.md
+    why: >-
+      Source-quality tiers, the alert severity taxonomy, evidence and
+      freshness rules, and the ethics line (public information only, no
+      outreach). Edit this to tune what counts as signal without touching
+      the persona.
+
+channels:
+  - type: email
+    why: Weekly intelligence reports and red-alert notifications land in your inbox.
+
+schedules:
+  - name: Daily competitor sweep
+    cron: "0 8 * * 1-5"
+    timezone: "{{timezone}}"
+    why: Catch overnight moves before the workday starts.
+    instruction: >-
+      Run the daily sweep (competitor-monitoring skill): check each tracked
+      competitor and the market watch terms for NEW developments since the
+      last sweep — funding, launches, pricing changes, notable content,
+      leadership moves, hiring signals. Verify anything you plan to report,
+      update the competitor profiles and the intel ledger, then deliver per
+      the intel-reporting skill: red-severity news → email {{user_name}}
+      immediately with evidence; otherwise a tight digest reply of the
+      deltas. If nothing genuinely new happened, end the run silently — no
+      "all quiet" messages, the weekly report covers quiet weeks.
+  - name: Weekly intelligence report
+    cron: "0 15 * * 5"
+    timezone: "{{timezone}}"
+    why: The Friday landscape read — everything that moved, what it means, who to call.
+    instruction: >-
+      First run the prospect-mining sweep (prospect-mining skill) to refresh
+      the prospect list. Then compile and email {{user_name}} the weekly
+      intelligence report
+      (intel-reporting skill): the week's competitor moves with sources and
+      what each means for {{company_name}}; funding and market shifts;
+      content/positioning changes worth knowing; the week's mined prospects
+      (prospect-mining skill) with their switching signals and suggested
+      angles; and 2-3 recommended actions ranked by impact. Refresh any
+      battlecard whose competitor moved this week. This report always ships,
+      even on a quiet week — a short "nothing moved, here's why that's
+      interesting" is a valid read.
+
+webhooks:
+  - name: Research request
+    source: generic
+    why: Let a form, Slack workflow, or another agent commission a deep dive.
+    instruction: >-
+      A research request just arrived. Read the payload for the question and
+      any deadline, run it through the deep-dive-research skill, and deliver
+      the answer to {{user_name}} in chat — email as well if the payload asks
+      for it or the findings are red-severity.
+
+integrations:
+  # Scout's core loop runs on built-in web search — zero connections needed
+  # to deploy. These light up extra surfaces when connected.
+  - service: notion
+    why: File weekly reports and battlecards into your team's intel base.
+  - service: google_sheets
+    why: Maintain the prospect tracker as a shared sheet your sales side works from.
+  - service: linkedin
+    why: Watch competitor company posts and leadership moves natively (gated API — best effort).
+
+permissions:
+  web_research: auto            # reading public sources is the job
+  send_report_email: auto       # reports to {{user_name}} are the designed loop
+  contact_prospects: block      # Scout finds them; humans (or your SDR agent) reach out
+  publish_externally: block     # intel is internal — nothing Scout writes leaves the org
+  delete_data: block
